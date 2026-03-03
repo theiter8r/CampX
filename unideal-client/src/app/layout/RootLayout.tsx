@@ -1,7 +1,9 @@
 import { Outlet, useLocation } from "react-router-dom"
 import { AnimatePresence, motion } from "framer-motion"
+import { useUser } from "@clerk/clerk-react"
 import { Navbar } from "./Navbar"
 import { Footer } from "./Footer"
+import { useAblyConnection, useRealtimeNotifications } from "@/hooks"
 
 /** Page transition variants */
 const pageVariants = {
@@ -21,6 +23,13 @@ const pageVariants = {
 /** Root layout — Navbar + animated page content + Footer */
 export function RootLayout() {
   const { pathname } = useLocation()
+  const { user } = useUser()
+
+  // Manage Ably connection lifecycle (connect when auth'd, disconnect on logout)
+  useAblyConnection()
+
+  // Subscribe to real-time notifications for the current user
+  useRealtimeNotifications(user?.id)
 
   return (
     <div className="flex min-h-screen flex-col bg-background">

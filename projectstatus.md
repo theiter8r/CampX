@@ -1,9 +1,9 @@
 # Unideal — Project Status
 
-> **Last Updated**: 2026-03-06
-> **Current Phase**: Phase 5B COMPLETE — Chat & Notifications Backend
-> **Next Phase**: Phase 5F — Chat & Notifications Frontend
-> **Last Agent**: Agent B (Phase 5B)
+> **Last Updated**: 2026-03-07
+> **Current Phase**: Phase 5 COMPLETE — Chat & Notifications (Frontend + Backend)
+> **Next Phase**: Phase 6 — Ratings, Reviews & Profiles
+> **Last Agent**: Agent F (Phase 5F)
 
 ---
 
@@ -16,12 +16,12 @@
 | 2 | Onboarding & ID Verification | ✅ COMPLETE | ✅ | ✅ | ✅ 2A.1, 2A.2 | 100% |
 | 3 | Listings, Search & Discovery | ✅ COMPLETE | ✅ | ✅ | — | 100% |
 | 4 | Razorpay Payments & Escrow | ✅ COMPLETE | ✅ | ✅ | — | 100% |
-| 5 | Real-time Chat & Notifications | 🔄 IN PROGRESS | ⬜ | ✅ | — | 50% |
+| 5 | Real-time Chat & Notifications | ✅ COMPLETE | ✅ | ✅ | — | 100% |
 | 6 | Ratings, Reviews & Profiles | ⬜ NOT STARTED | ⬜ | ⬜ | — | 0% |
 | 7 | Admin Panel & Moderation | 🔄 IN PROGRESS | ✅ Routes | ✅ | ✅ All 7A pages + integration | 85% |
 | 8 | Polish, Performance & Deployment | ⬜ NOT STARTED | ⬜ | ⬜ | ⬜ | 0% |
 
-**Overall Completion: ~75%** (planning + admin integration + frontend Phase 1–4 + backend Phase 1–5 + services created)
+**Overall Completion: ~80%** (planning + admin integration + frontend Phase 1–5 + backend Phase 1–5 + services created)
 
 ---
 
@@ -228,11 +228,17 @@ Each item: `{ id, title, images, listingType, sellPrice, rentPricePerDay, condit
 - `tsc --noEmit` passes with 0 errors
 - Schema change requires `prisma migrate dev` or `prisma db push` on deployment
 
-### Frontend Tasks (Agent F) — ⬜ NOT STARTED
-- [ ] **5F.1** — Ably client setup (token auth, connection management)
-- [ ] **5F.2** — Chat page (conversation list + message thread + real-time updates)
-- [ ] **5F.3** — Notification bell + dropdown (real-time count, mark read)
-- [ ] **5F.4** — Notification preferences page in Settings
+### Frontend Tasks (Agent F) — ✅ ALL COMPLETE
+- [x] **5F.1** — Ably client setup: `lib/ably.ts` (singleton Realtime client, token auth via POST /api/ably/token, connect/disconnect/subscribe helpers)
+- [x] **5F.2** — Chat page: Full rewrite of `Chat.tsx` with conversation sidebar (ConversationList), message thread (MessageThread with MessageBubble), ChatInput with auto-resize, mobile responsive (full-screen list ↔ full-screen thread), skeleton/error/empty states
+- [x] **5F.3** — Message thread: MessageBubble (TEXT, LOCATION with inline MiniMap, IMAGE, SYSTEM types), day-group date separators, auto-scroll on new messages, load-more pagination for older messages
+- [x] **5F.4** — Chat input + location sharing: ChatInput with Enter-to-send + Shift+Enter newline, LocationShareButton dialog (reuses LocationPicker component), sends LOCATION type messages with `{ lat, lng, locationText }` JSON
+- [x] **5F.5** — Notification bell + panel: NotificationBell (animated unread badge, outside-click dismiss), NotificationPanel dropdown (type-based icons, mark-all-read, individual delete, click-to-navigate, load-more, settings link). Integrated into Navbar.
+- [x] **5F.6** — Notification preferences: Settings page notification section with per-type email/inApp toggles (Switch components), loading skeleton, error state. RootLayout global Ably connection + real-time notification subscription.
+
+### Hooks Created (`unideal-client/src/hooks/`)
+- [x] `useChat.ts` — useConversations (30s poll), useMessages (infinite, newest first), useSendMessage, useRealtimeMessages (Ably subscription → cache update), useAblyConnection, useRealtimeNotifications, useOptimisticMessage
+- [x] `useNotifications.ts` — useNotifications (infinite, cursor), useUnreadCount (30s poll), useMarkNotificationsRead (batch/all), useDeleteNotification, useNotificationPreferences, useUpdateNotificationPreferences
 
 ---
 
@@ -574,8 +580,40 @@ Each item: `{ id, title, images, listingType, sellPrice, rentPricePerDay, condit
 **Blockers**: None
 
 **Next Up**:
-- Agent F: Phase 5F (chat UI, Ably real-time subscription, notification bell, notification preferences page)
+- Agent F: Phase 6F (reviews UI, ratings, profile enhancements)
 - Agent B: Phase 6B (reviews, ratings, profile enhancements)
+
+---
+
+### Handoff from Agent F — 2026-03-07 (Phase 5F Complete)
+
+**Completed Tasks**: 5F.1–5F.6 (Ably client, chat page, message thread, chat input + location, notification bell + panel, notification preferences)
+
+**Files Created** (`unideal-client/src/`):
+- `lib/ably.ts` — Ably Realtime client singleton with token auth (authCallback → POST /api/ably/token), connect/disconnect/subscribe helpers
+- `hooks/useChat.ts` — 7 hooks: useConversations, useMessages (infinite), useSendMessage, useRealtimeMessages, useAblyConnection, useRealtimeNotifications, useOptimisticMessage
+- `hooks/useNotifications.ts` — 6 hooks: useNotifications (infinite), useUnreadCount, useMarkNotificationsRead, useDeleteNotification, useNotificationPreferences, useUpdateNotificationPreferences
+- `components/chat/ConversationList.tsx` — Sidebar conversation list with avatars, last message preview, unread badges, stagger animations, loading skeletons
+- `components/chat/MessageBubble.tsx` — Sent/received message bubbles (TEXT, LOCATION with MiniMap, IMAGE, SYSTEM), relative timestamps
+- `components/chat/MessageThread.tsx` — Scrollable message list with day-group separators, auto-scroll to bottom, load-more pagination, empty/loading states
+- `components/chat/ChatInput.tsx` — Textarea with auto-resize, Enter to send, location share dialog (opens LocationPicker), send button with loading state
+- `components/notifications/NotificationBell.tsx` — Navbar bell icon with animated unread count badge, outside-click dismissal, dropdown panel
+- `components/notifications/NotificationPanel.tsx` — Notification dropdown with mark-all-read, per-item delete, type-based icons, click-to-navigate, load-more, settings link
+- `components/ui/switch.tsx` — shadcn Switch component (Radix UI)
+
+**Files Modified** (`unideal-client/src/`):
+- `types/index.ts` — Fixed Conversation/Message types to match backend API (content not body, ablyChannelName, transactionStatus). Added MessageType, ConversationDetail, SendMessageInput, NotificationPreferences interfaces.
+- `hooks/index.ts` — Added barrel exports for all 13 new hooks
+- `app/routes/Chat.tsx` — Full rewrite: conversation sidebar + message thread + real-time subscriptions + ChatInput + mobile responsive layout
+- `app/routes/Settings.tsx` — Added notification preferences section with per-type email/inApp toggles using Switch components
+- `app/layout/Navbar.tsx` — Replaced placeholder bell with real NotificationBell component
+- `app/layout/RootLayout.tsx` — Added useAblyConnection() + useRealtimeNotifications() for global real-time connectivity
+
+**Packages Installed**: `ably`, `@radix-ui/react-switch`
+
+**Build Status**: `tsc --noEmit` 0 errors. `vite build` succeeds (7.18s).
+
+**Blockers**: None
 
 ---
 
@@ -605,3 +643,4 @@ _Items moved here from active phases when scope becomes too large:_
 | 2026-03-05 | B | Phase 4B complete | Orders (Razorpay creation), payments (verify+webhook), transactions (list+detail+confirm-receipt+dispute), wallet (balance+history+withdraw). 4 new route files, index.ts modified. `tsc --noEmit` clean (0 errors). |
 | 2026-03-06 | A | Cross-repo integration | Admin routes registered in App.tsx (6 lazy routes under AdminLayout), created alert-dialog.tsx + resend.ts + ably.ts, installed @radix-ui/react-alert-dialog, fixed react-map-gl v8 imports, cleaned ~20 unused imports across both repos. Both repos `tsc --noEmit` clean + `vite build` succeeds. Phase 7 -> 85%. |
 | 2026-03-06 | B | Phase 5B complete | Ably token auth (createTokenRequest + POST /api/ably/token), conversations (list+detail+send message with Ably publish), notifications (list+mark-read+delete), 5 email templates (newMessage, idVerified, idRejected, dispute, transactionSettled), notification preferences (JSON field + GET/PUT endpoints). 3 new route files, 5 modified files. Schema: added notificationPreferences Json? to User. `tsc --noEmit` clean (0 errors). |
+| 2026-03-07 | F | Phase 5F complete | Ably client (token auth singleton), chat hooks (7: conversations, messages infinite, send, real-time, connection, notifications, optimistic), notification hooks (6: list, unread count, mark read, delete, preferences, update prefs). Chat components (ConversationList, MessageBubble, MessageThread, ChatInput with location share). Notification components (NotificationBell with badge, NotificationPanel with dropdown). Chat.tsx full rewrite (sidebar+thread+real-time+mobile). Settings.tsx notification preferences (email+inApp toggles). Navbar NotificationBell integration. RootLayout global Ably connection. 10 new files, 6 modified. `tsc --noEmit` + `vite build` clean. |

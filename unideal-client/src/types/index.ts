@@ -166,25 +166,64 @@ export interface Notification {
 
 export interface Conversation {
   id: string
-  itemId: string
-  item: Pick<Item, "id" | "title" | "images" | "status">
-  user1Id: string
-  user2Id: string
+  transactionId: string
+  ablyChannelName: string
+  lastMessageAt: string | null
+  createdAt: string
   otherUser: Pick<UserProfile, "id" | "fullName" | "avatarUrl" | "verificationStatus">
-  lastMessage?: Pick<Message, "body" | "createdAt" | "type">
+  item: Pick<Item, "id" | "title" | "images">
+  transactionStatus: TransactionStatus
+  lastMessage: {
+    id: string
+    content: string
+    type: MessageType
+    senderId: string
+    createdAt: string
+  } | null
   unreadCount: number
-  updatedAt: string
 }
+
+export type MessageType = "TEXT" | "LOCATION" | "IMAGE" | "SYSTEM"
 
 export interface Message {
   id: string
   conversationId: string
   senderId: string
-  type: "TEXT" | "LOCATION" | "IMAGE" | "SYSTEM"
-  body: string
-  metadata?: Record<string, unknown>
+  type: MessageType
+  content: string
   isRead: boolean
   createdAt: string
+  sender: Pick<UserProfile, "id" | "fullName" | "avatarUrl">
+}
+
+/** Conversation detail returned by GET /api/conversations/:id */
+export interface ConversationDetail {
+  conversation: {
+    id: string
+    ablyChannelName: string
+    transactionId: string
+    transaction: {
+      id: string
+      status: TransactionStatus
+      item: Pick<Item, "id" | "title" | "images">
+    }
+    otherUser: Pick<UserProfile, "id" | "fullName" | "avatarUrl" | "verificationStatus">
+  }
+  messages: Message[]
+  nextCursor: string | null
+  hasMore: boolean
+}
+
+/** Send message request body */
+export interface SendMessageInput {
+  type?: MessageType
+  content: string
+}
+
+/** Notification preferences shape */
+export interface NotificationPreferences {
+  email: Record<string, boolean>
+  inApp: Record<string, boolean>
 }
 
 export interface Transaction {

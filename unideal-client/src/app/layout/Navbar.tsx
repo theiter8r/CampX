@@ -1,9 +1,10 @@
 import { Link, NavLink, useNavigate } from "react-router-dom"
 import { useAuth, useUser, SignInButton, UserButton } from "@clerk/clerk-react"
 import { motion } from "framer-motion"
-import { Bell, Menu, Plus } from "lucide-react"
+import { Menu, Plus } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { VerificationBadge } from "@/components/ui/VerificationBadge"
+import { NotificationBell } from "@/components/notifications/NotificationBell"
 import { MobileNav } from "./MobileNav"
 import { useState } from "react"
 import { ROUTES } from "@/lib/constants"
@@ -78,16 +79,9 @@ export function Navbar() {
                 </Button>
 
                 {/* Notification bell */}
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  className="relative hidden sm:flex"
-                  onClick={() => {/* open notification panel */}}
-                  aria-label="Notifications"
-                >
-                  <Bell size={20} />
-                  {/* unread badge — managed by notification hook */}
-                </Button>
+                <div className="hidden sm:block">
+                  <NotificationBell />
+                </div>
 
                 {/* Verification badge */}
                 <VerificationBadge
