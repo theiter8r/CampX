@@ -28,7 +28,18 @@ interface ClerkUserUpdatedEvent {
   }
 }
 
-type ClerkWebhookEvent = ClerkUserCreatedEvent | ClerkUserUpdatedEvent
+interface ClerkUserDeletedEvent {
+  type: "user.deleted"
+  data: {
+    id: string
+    deleted: boolean
+  }
+}
+
+type ClerkWebhookEvent =
+  | ClerkUserCreatedEvent
+  | ClerkUserUpdatedEvent
+  | ClerkUserDeletedEvent
 
 /**
  * POST /api/webhooks/clerk
@@ -71,25 +82,23 @@ router.post(
       return
     }
 
-    const { type, data } = event
-
     try {
-      if (type === "user.created") {
-        const primaryEmail = data.email_addresses.find(
-          (e) => e.id === data.primary_email_address_id
+      if (event.type === "user.created") {
+        const primaryEmail = event.data.email_addresses.find(
+          (e) => e.id === event.data.primary_email_address_id
         )
         const email = primaryEmail?.email_address ?? ""
         const fullName =
-          [data.first_name, data.last_name].filter(Boolean).join(" ") ||
+          [event.data.first_name, event.data.last_name].filter(Boolean).join(" ") ||
           "Unideal User"
 
         // Create user + wallet atomically
         await prisma.user.create({
           data: {
-            clerkId: data.id,
+            clerkId: event.data.id,
             email,
             fullName,
-            avatarUrl: data.image_url ?? undefined,
+            avatarUrl: event.data.image_url ?? undefined,
             wallet: { create: {} },
           },
         })
@@ -97,25 +106,34 @@ router.post(
         console.log(`[Clerk webhook] Created user: ${email}`)
       }
 
-      if (type === "user.updated") {
-        const primaryEmail = data.email_addresses.find(
-          (e) => e.id === data.primary_email_address_id
+      if (event.type === "user.updated") {
+        const primaryEmail = event.data.email_addresses.find(
+          (e) => e.id === event.data.primary_email_address_id
         )
         const email = primaryEmail?.email_address ?? undefined
         const fullName =
-          [data.first_name, data.last_name].filter(Boolean).join(" ") ||
+          [event.data.first_name, event.data.last_name].filter(Boolean).join(" ") ||
           undefined
 
         await prisma.user.update({
-          where: { clerkId: data.id },
+          where: { clerkId: event.data.id },
           data: {
             ...(email && { email }),
             ...(fullName && { fullName }),
-            ...(data.image_url && { avatarUrl: data.image_url }),
+            ...(event.data.image_url && { avatarUrl: event.data.image_url }),
           },
         })
 
-        console.log(`[Clerk webhook] Updated user: ${data.id}`)
+        console.log(`[Clerk webhook] Updated user: ${event.data.id}`)
+      }
+
+      if (event.type === "user.deleted") {
+        // Use deleteMany for idempotency — silently succeeds if user was already removed
+        await prisma.user.deleteMany({
+          where: { clerkId: event.data.id },
+        })
+
+        console.log(`[Clerk webhook] Deleted user: ${event.data.id}`)
       }
 
       res.status(200).json({ received: true })

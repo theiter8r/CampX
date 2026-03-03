@@ -4,6 +4,7 @@ export const onboardingSchema = z.object({
   collegeId: z.string().min(1),
   fullName: z.string().min(2).max(100),
   phone: z.string().regex(/^\+?[0-9]{7,15}$/, "Invalid phone number").optional(),
+  avatarUrl: z.string().url("Must be a valid URL").optional(),
 })
 
 export const updateProfileSchema = z.object({

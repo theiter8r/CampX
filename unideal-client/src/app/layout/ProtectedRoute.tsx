@@ -27,9 +27,9 @@ export function ProtectedRoute() {
     return <Navigate to={`/?redirect_url=${redirectUrl}`} replace />
   }
 
-  // Check onboarding completion — stored in Clerk public metadata
+  // Check onboarding completion — stored in Clerk unsafe metadata (client-writable)
   const onboardingComplete =
-    (user?.publicMetadata as { onboardingComplete?: boolean })
+    (user?.unsafeMetadata as { onboardingComplete?: boolean })
       ?.onboardingComplete ?? false
 
   if (!onboardingComplete && pathname !== "/onboarding") {

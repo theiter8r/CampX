@@ -122,7 +122,7 @@ router.post(
   validate(onboardingSchema),
   async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
-      const { collegeId, fullName, phone } = req.body
+      const { collegeId, fullName, phone, avatarUrl } = req.body
       const userId = req.user!.id
 
       // Verify college exists and is active
@@ -149,6 +149,7 @@ router.post(
             phone: phone ?? null,
             collegeId,
             onboardingComplete: true,
+            ...(avatarUrl && { avatarUrl }),
           },
           select: {
             id: true,

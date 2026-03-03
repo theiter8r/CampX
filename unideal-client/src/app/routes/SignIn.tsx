@@ -12,7 +12,7 @@ export function SignIn() {
         routing="path"
         path={ROUTES.SIGN_IN}
         signUpUrl={ROUTES.SIGN_UP}
-        afterSignInUrl={ROUTES.BROWSE}
+        fallbackRedirectUrl={ROUTES.BROWSE}
         appearance={{
           elements: {
             rootBox: "mx-auto",

@@ -1,5 +1,5 @@
 import { Link, NavLink, useNavigate } from "react-router-dom"
-import { useAuth, useUser, SignInButton, UserButton } from "@clerk/clerk-react"
+import { useAuth, SignInButton, UserButton } from "@clerk/clerk-react"
 import { motion } from "framer-motion"
 import { Menu, Plus } from "lucide-react"
 import { Button } from "@/components/ui/button"
@@ -8,6 +8,7 @@ import { NotificationBell } from "@/components/notifications/NotificationBell"
 import { MobileNav } from "./MobileNav"
 import { useState } from "react"
 import { ROUTES } from "@/lib/constants"
+import { useUserProfile } from "@/hooks"
 
 const NAV_LINKS = [
   { href: ROUTES.BROWSE, label: "Browse" },
@@ -19,13 +20,9 @@ const NAV_LINKS = [
 /** Top navigation bar — responsive, auth-aware */
 export function Navbar() {
   const { isSignedIn, isLoaded } = useAuth()
-  const { user } = useUser()
+  const { data: userProfile, isLoading: profileLoading } = useUserProfile()
   const navigate = useNavigate()
   const [mobileOpen, setMobileOpen] = useState(false)
-
-  const verificationStatus =
-    (user?.publicMetadata as { verificationStatus?: string })
-      ?.verificationStatus ?? "UNVERIFIED"
 
   return (
     <>
@@ -83,11 +80,13 @@ export function Navbar() {
                   <NotificationBell />
                 </div>
 
-                {/* Verification badge */}
-                <VerificationBadge
-                  status={verificationStatus as "UNVERIFIED" | "PENDING" | "VERIFIED" | "REJECTED"}
-                  size="sm"
-                />
+                {/* Verification badge — only show once profile has loaded */}
+                {!profileLoading && userProfile && (
+                  <VerificationBadge
+                    status={userProfile.verificationStatus}
+                    size="sm"
+                  />
+                )}
 
                 {/* Clerk user button (avatar + dropdown) */}
                 <UserButton
