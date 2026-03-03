@@ -8,7 +8,7 @@ import cors from "cors"
 import helmet from "helmet"
 import morgan from "morgan"
 import { errorHandler } from "./middleware/errorHandler.js"
-import { generalLimiter, webhookLimiter } from "./middleware/rateLimiter.js"
+import { generalLimiter } from "./middleware/rateLimiter.js"
 
 // Route imports
 import authRoutes from "./routes/auth.js"
@@ -44,14 +44,7 @@ app.use(
   })
 )
 
-// Webhook endpoints need raw body for signature verification
-app.use(
-  "/api/webhooks",
-  webhookLimiter,
-  express.raw({ type: "application/json" })
-)
-
-// JSON parsing for all other routes
+// JSON parsing for all routes
 app.use(express.json({ limit: "10mb" }))
 
 // Request logging
@@ -70,7 +63,7 @@ app.get("/health", (_req, res) => {
 
 // ── API Routes ────────────────────────────────────────────────────────────────
 
-app.use("/api/webhooks/clerk", authRoutes)
+app.use("/api/auth", authRoutes)
 app.use("/api/users", userRoutes)
 app.use("/api/categories", categoryRoutes)
 app.use("/api/colleges", collegeRoutes)

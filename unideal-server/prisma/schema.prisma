@@ -127,12 +127,17 @@ model College {
 
 model User {
   id                      String             @id @default(cuid())
-  clerkId                 String             @unique
   email                   String             @unique
+  passwordHash            String?
   fullName                String
   phone                   String?
   avatarUrl               String?
   collegeId               String?
+  emailVerified           Boolean            @default(false)
+  emailVerificationToken  String?            @unique
+  emailVerificationExpires DateTime?
+  passwordResetToken      String?            @unique
+  passwordResetExpires    DateTime?
   verificationStatus      VerificationStatus @default(UNVERIFIED)
   isAdmin                 Boolean            @default(false)
   isBanned                Boolean            @default(false)
@@ -157,7 +162,6 @@ model User {
   reportsMade          Report[]       @relation("ReporterReports")
   reportsReceived      Report[]       @relation("ReportedUserReports")
 
-  @@index([clerkId])
   @@index([collegeId])
   @@index([email])
 }

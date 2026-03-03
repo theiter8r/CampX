@@ -26,7 +26,7 @@ export const strictLimiter = rateLimit({
   },
 })
 
-/** Webhook limiter: 200 req / 15 min (Clerk/Razorpay post frequently) */
+/** Webhook limiter: 200 req / 15 min (for payment provider webhooks) */
 export const webhookLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,
   max: 200,
