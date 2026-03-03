@@ -3,7 +3,7 @@
 // ============================================
 
 export const API_BASE_URL =
-  import.meta.env.VITE_API_URL ?? "http://localhost:5000"
+  import.meta.env.VITE_API_URL ?? "http://localhost:5001"
 
 // -------- Categories --------
 export const CATEGORIES = [
@@ -100,6 +100,25 @@ export const WALLET_TX_ICONS: Record<string, string> = {
   WITHDRAWAL: "ArrowDownRight",
   REFUND_DEBIT: "ArrowUpLeft",
 }
+
+// -------- Report reason labels --------
+export const REPORT_REASON_LABELS: Record<string, string> = {
+  SPAM: "Spam or misleading",
+  FAKE_LISTING: "Fake / counterfeit listing",
+  INAPPROPRIATE: "Inappropriate content",
+  SCAM: "Scam or fraud",
+  HARASSMENT: "Harassment or abuse",
+  OTHER: "Other",
+}
+
+export const REPORT_REASONS = [
+  { value: "SPAM", label: "Spam or misleading" },
+  { value: "FAKE_LISTING", label: "Fake / counterfeit listing" },
+  { value: "INAPPROPRIATE", label: "Inappropriate content" },
+  { value: "SCAM", label: "Scam or fraud" },
+  { value: "HARASSMENT", label: "Harassment or abuse" },
+  { value: "OTHER", label: "Other" },
+] as const
 
 // -------- Routes --------
 export const ROUTES = {

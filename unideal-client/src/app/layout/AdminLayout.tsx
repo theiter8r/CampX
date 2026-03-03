@@ -7,6 +7,7 @@ import {
   Package,
   CreditCard,
   Flag,
+  GraduationCap,
   LogOut,
   Menu,
   X,
@@ -25,6 +26,7 @@ const navItems = [
   { to: "/admin/listings", label: "Listings", icon: Package },
   { to: "/admin/transactions", label: "Transactions", icon: CreditCard },
   { to: "/admin/reports", label: "Reports", icon: Flag },
+  { to: "/admin/colleges", label: "Colleges", icon: GraduationCap },
 ]
 
 /**

@@ -22,12 +22,7 @@ export function useConversations() {
 
   return useQuery<Conversation[]>({
     queryKey: ["conversations"],
-    queryFn: async () => {
-      const res = await api.get<{ success: boolean; data: Conversation[] }>(
-        "/api/conversations"
-      )
-      return res.data
-    },
+    queryFn: () => api.get<Conversation[]>("/api/conversations"),
     enabled: !!isSignedIn,
     refetchInterval: 30_000, // Poll every 30s as backup to real-time
   })
@@ -47,11 +42,10 @@ export function useMessages({ conversationId, enabled = true }: UseMessagesOptio
     queryFn: async ({ pageParam }) => {
       const params: Record<string, string | number> = { limit: 30 }
       if (pageParam) params.cursor = pageParam as string
-      const res = await api.get<{ success: boolean; data: ConversationDetail }>(
+      return api.get<ConversationDetail>(
         `/api/conversations/${conversationId}`,
         { params }
       )
-      return res.data
     },
     initialPageParam: undefined as string | undefined,
     getNextPageParam: (lastPage) =>
@@ -73,11 +67,10 @@ export function useSendMessage() {
 
   return useMutation<Message, Error, SendMessageArgs>({
     mutationFn: async ({ conversationId, input }) => {
-      const res = await api.post<{ success: boolean; data: Message }>(
+      return api.post<Message>(
         `/api/conversations/${conversationId}/messages`,
         input
       )
-      return res.data
     },
     onSuccess: (_data, { conversationId }) => {
       // Invalidate conversations list to update lastMessage preview + order

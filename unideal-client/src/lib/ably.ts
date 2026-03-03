@@ -18,10 +18,10 @@ export function getAblyClient(): Ably.Realtime {
   realtimeClient = new Ably.Realtime({
     authCallback: async (_params, callback) => {
       try {
-        const response = await api.post<{ success: boolean; data: Ably.TokenRequest }>(
+        const tokenRequest = await api.post<Ably.TokenRequest>(
           "/api/ably/token"
         )
-        callback(null, response.data)
+        callback(null, tokenRequest)
       } catch (err) {
         callback(err as Error, null)
       }

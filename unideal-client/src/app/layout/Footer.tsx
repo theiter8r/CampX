@@ -65,7 +65,7 @@ export function Footer() {
 
         <div className="flex flex-col items-center justify-between gap-4 sm:flex-row">
           <p className="text-xs text-muted-foreground">
-            © {new Date().getFullYear()} Unideal. Built for campus communities.
+            © {new Date().getFullYear()} Unideal. Built for campus communities. Built by Raaj Patkar.
           </p>
           <p className="text-xs text-muted-foreground">
             Transactions protected by Razorpay Escrow

@@ -41,6 +41,7 @@ export type ReportReason =
   | "SCAM"
   | "HARASSMENT"
   | "OTHER"
+export type ReportStatus = "PENDING" | "REVIEWED" | "ACTION_TAKEN" | "DISMISSED"
 
 // -------- Entities --------
 
@@ -53,6 +54,7 @@ export interface College {
   state: string
   campusLat?: number
   campusLng?: number
+  campusBoundary?: unknown
   logoUrl?: string
   isActive: boolean
   createdAt: string
@@ -150,7 +152,6 @@ export interface Verification {
   reviewerNotes?: string
   reviewedAt?: string
   createdAt: string
-  updatedAt: string
 }
 
 export interface Notification {
@@ -306,6 +307,73 @@ export interface Review {
   rating: number
   comment?: string
   createdAt: string
+  transaction?: {
+    id: string
+    type: TransactionType
+    item: Pick<Item, "id" | "title" | "images">
+  }
+}
+
+/** Public profile returned by GET /api/users/:id */
+export interface PublicProfile {
+  id: string
+  fullName: string
+  avatarUrl?: string
+  verificationStatus: VerificationStatus
+  createdAt: string
+  college?: Pick<College, "id" | "name" | "slug">
+  itemCount: number
+  reviewCount: number
+  avgRating: number
+}
+
+/** Reviews response from GET /api/reviews/user/:id */
+export interface ReviewsResponse {
+  reviews: Review[]
+  avgRating: number
+  totalReviews: number
+  nextCursor: string | null
+  hasMore: boolean
+}
+
+/** Create review input for POST /api/reviews */
+export interface CreateReviewInput {
+  transactionId: string
+  rating: number
+  comment?: string
+}
+
+/** Full report entity (admin views) */
+export interface Report {
+  id: string
+  reporterId: string
+  reporter?: Pick<UserProfile, "id" | "fullName" | "avatarUrl" | "email">
+  reportedUserId?: string
+  reportedUser?: Pick<UserProfile, "id" | "fullName" | "avatarUrl">
+  reportedItemId?: string
+  reportedItem?: Pick<Item, "id" | "title" | "images">
+  reason: ReportReason
+  description?: string
+  status: ReportStatus
+  adminNotes?: string
+  reviewedBy?: string
+  createdAt: string
+  updatedAt: string
+}
+
+/** Create report input for POST /api/reports */
+export interface CreateReportInput {
+  reportedUserId?: string
+  reportedItemId?: string
+  reason: ReportReason
+  description?: string
+}
+
+/** Update profile input for PUT /api/users/me */
+export interface UpdateProfileInput {
+  fullName?: string
+  phone?: string
+  avatarUrl?: string
 }
 
 // -------- API Request / Response Types --------
@@ -341,6 +409,7 @@ export interface ItemFilters {
   cursor?: string
   category?: string
   college?: string
+  sellerId?: string
   type?: ListingType
   condition?: ItemCondition
   priceMin?: number

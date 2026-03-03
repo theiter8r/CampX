@@ -30,11 +30,10 @@ export function useNotifications(opts: UseNotificationsOptions = {}) {
       const params: Record<string, string | number | boolean> = { limit: 20 }
       if (pageParam) params.cursor = pageParam as string
       if (opts.unreadOnly) params.unreadOnly = true
-      const res = await api.get<{ success: boolean; data: NotificationsResponse }>(
+      return api.get<NotificationsResponse>(
         "/api/notifications",
         { params }
       )
-      return res.data
     },
     initialPageParam: undefined as string | undefined,
     getNextPageParam: (lastPage) =>
@@ -52,11 +51,11 @@ export function useUnreadCount() {
   return useQuery<number>({
     queryKey: ["notifications", "unreadCount"],
     queryFn: async () => {
-      const res = await api.get<{ success: boolean; data: NotificationsResponse }>(
+      const res = await api.get<NotificationsResponse>(
         "/api/notifications",
         { params: { limit: 1 } }
       )
-      return res.data.unreadCount
+      return res.unreadCount
     },
     enabled: !!isSignedIn,
     refetchInterval: 30_000,
@@ -77,11 +76,10 @@ export function useMarkNotificationsRead() {
   return useMutation<{ markedRead: number }, Error, MarkReadInput>({
     mutationFn: async (input) => {
       const body = input.all ? { all: true } : { ids: input.ids }
-      const res = await api.patch<{ success: boolean; data: { markedRead: number } }>(
+      return api.patch<{ markedRead: number }>(
         "/api/notifications/read",
         body
       )
-      return res.data
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["notifications"] })
@@ -115,10 +113,9 @@ export function useNotificationPreferences() {
   return useQuery<NotificationPreferences>({
     queryKey: ["notificationPreferences"],
     queryFn: async () => {
-      const res = await api.get<{ success: boolean; data: NotificationPreferences }>(
+      return api.get<NotificationPreferences>(
         "/api/users/me/notification-preferences"
       )
-      return res.data
     },
     enabled: !!isSignedIn,
   })
@@ -130,11 +127,10 @@ export function useUpdateNotificationPreferences() {
 
   return useMutation<NotificationPreferences, Error, Partial<NotificationPreferences>>({
     mutationFn: async (input) => {
-      const res = await api.put<{ success: boolean; data: NotificationPreferences }>(
+      return api.put<NotificationPreferences>(
         "/api/users/me/notification-preferences",
         input
       )
-      return res.data
     },
     onSuccess: (data) => {
       queryClient.setQueryData(["notificationPreferences"], data)

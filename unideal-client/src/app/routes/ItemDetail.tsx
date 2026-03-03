@@ -36,6 +36,7 @@ import {
   PaymentErrorDialog,
 } from "@/components/payments/PaymentAnimations"
 import { RentDatePicker } from "@/components/payments/RentDatePicker"
+import { ReportModal } from "@/components/ReportModal"
 
 import { useItem, useItems } from "@/hooks/useItems"
 import { useToggleFavorite } from "@/hooks/useFavorites"
@@ -76,6 +77,9 @@ export function ItemDetail() {
   const [lastPaidAmount, setLastPaidAmount] = useState("")
   const [lastConversationId, setLastConversationId] = useState<string | undefined>()
   const [_lastTransactionId, setLastTransactionId] = useState<string | undefined>()
+
+  // Report modal state
+  const [reportOpen, setReportOpen] = useState(false)
 
   // Rent date picker state
   const [showRentPicker, setShowRentPicker] = useState(false)
@@ -477,6 +481,7 @@ export function ItemDetail() {
               variant="ghost"
               size="sm"
               className="self-start text-muted-foreground hover:text-destructive gap-1.5"
+              onClick={() => setReportOpen(true)}
             >
               <Flag className="h-3.5 w-3.5" />
               Report this listing
@@ -532,6 +537,14 @@ export function ItemDetail() {
           isLoading={createOrder.isPending}
         />
       )}
+
+      {/* Report modal */}
+      <ReportModal
+        open={reportOpen}
+        onOpenChange={setReportOpen}
+        reportedItemId={id}
+        targetName={item?.title}
+      />
     </div>
   )
 }

@@ -35,7 +35,7 @@ export function validate(schema: ZodSchema) {
 export function validateQuery(schema: ZodSchema) {
   return (req: Request, res: Response, next: NextFunction): void => {
     try {
-      req.query = schema.parse(req.query) as Record<string, string>
+      schema.parse(req.query)
       next()
     } catch (error) {
       if (error instanceof ZodError) {

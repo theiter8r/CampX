@@ -17,6 +17,7 @@ import {
   PackageCheck,
   ChevronRight,
   Wallet,
+  Star,
 } from "lucide-react"
 import { toast } from "sonner"
 
@@ -33,6 +34,7 @@ import {
   DialogDescription,
 } from "@/components/ui/dialog"
 import { Textarea } from "@/components/ui/textarea"
+import { ReviewForm } from "@/components/reviews/ReviewForm"
 
 import { useMyItems } from "@/hooks/useItems"
 import { useUserProfile } from "@/hooks/useUserProfile"
@@ -79,6 +81,11 @@ export function Dashboard() {
 
   const activeListings = (myItems ?? []).filter((i) => i.status === "AVAILABLE").length
   const soldItems = (myItems ?? []).filter((i) => i.status === "SOLD" || i.status === "RENTED").length
+
+  // Transactions awaiting review (settled + not yet reviewed)
+  const pendingReviews = transactions.filter(
+    (tx) => tx.status === "SETTLED" && tx.hasReviewed === false
+  )
 
   // ── stat cards ──
 
@@ -151,6 +158,64 @@ export function Dashboard() {
           </motion.div>
         ))}
       </div>
+
+      {/* Pending Reviews Banner (6F.5) */}
+      {pendingReviews.length > 0 && (
+        <motion.div
+          initial={{ opacity: 0, y: 12 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.25 }}
+          className="mb-8"
+        >
+          <Card className="border-purple-800/40 bg-purple-500/5">
+            <CardHeader className="pb-3">
+              <CardTitle className="flex items-center gap-2 text-base">
+                <Star className="h-4 w-4 text-purple-400" />
+                Leave a Review ({pendingReviews.length})
+              </CardTitle>
+              <p className="text-xs text-muted-foreground">
+                Share your experience from recent transactions
+              </p>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              {pendingReviews.slice(0, 3).map((tx) => (
+                <div
+                  key={tx.id}
+                  className="rounded-lg border border-zinc-800 bg-zinc-900/60 p-4"
+                >
+                  <div className="flex items-center gap-3 mb-3">
+                    {tx.item.images?.[0] && (
+                      <img
+                        src={tx.item.images[0]}
+                        alt={tx.item.title}
+                        className="h-10 w-10 rounded-md object-cover"
+                      />
+                    )}
+                    <div>
+                      <p className="text-sm font-medium text-foreground">
+                        {tx.item.title}
+                      </p>
+                      <p className="text-xs text-muted-foreground">
+                        with {tx.buyerId === profile?.id ? tx.seller.fullName : tx.buyer.fullName}
+                      </p>
+                    </div>
+                  </div>
+                  <ReviewForm
+                    transactionId={tx.id}
+                    itemTitle={tx.item.title}
+                    compact
+                  />
+                </div>
+              ))}
+              {pendingReviews.length > 3 && (
+                <p className="text-center text-xs text-muted-foreground">
+                  +{pendingReviews.length - 3} more transactions to review
+                </p>
+              )}
+            </CardContent>
+          </Card>
+        </motion.div>
+      )}
 
       {/* Main grid */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">

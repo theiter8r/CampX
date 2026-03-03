@@ -1,34 +1,36 @@
 // ============================================
-// Settings — user settings with notification preferences
+// Settings — edit profile + notification preferences
+// Tasks: 6F.4
 // ============================================
 
-import { useMemo } from "react"
+import { useMemo, useState, useRef } from "react"
 import { motion } from "framer-motion"
 import {
   Settings as SettingsIcon,
   User,
   Bell,
-  Shield,
-  CreditCard,
+  Camera,
+  Loader2,
   Mail,
   BellRing,
-  Loader2,
+  CheckCircle2,
+  Phone,
 } from "lucide-react"
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
+import { Button } from "@/components/ui/button"
+import { Input } from "@/components/ui/input"
+import { Label } from "@/components/ui/label"
 import { Separator } from "@/components/ui/separator"
 import { Switch } from "@/components/ui/switch"
-import { Label } from "@/components/ui/label"
 import { Skeleton } from "@/components/ui/skeleton"
 import {
+  useUserProfile,
   useNotificationPreferences,
   useUpdateNotificationPreferences,
 } from "@/hooks"
+import { useUpdateProfile } from "@/hooks/usePublicProfile"
+import { uploadToCloudinary } from "@/lib/cloudinary"
 import { cn } from "@/lib/utils"
-
-const SETTINGS_SECTIONS = [
-  { icon: User, label: "Profile", desc: "Name, avatar, contact info" },
-  { icon: Shield, label: "Privacy & Security", desc: "Password, linked accounts" },
-  { icon: CreditCard, label: "Payment", desc: "Bank accounts for withdrawal" },
-]
 
 /** Readable labels for notification type keys */
 const NOTIFICATION_TYPE_LABELS: Record<string, { label: string; description: string }> = {
@@ -43,7 +45,7 @@ const NOTIFICATION_TYPE_LABELS: Record<string, { label: string; description: str
   REVIEW_RECEIVED: { label: "New review", description: "When someone reviews you" },
 }
 
-/** Settings page with notification preferences */
+/** Settings page with edit profile + notification preferences */
 export function Settings() {
   return (
     <div className="mx-auto max-w-2xl px-4 py-8 sm:px-6 lg:px-8">
@@ -52,38 +54,208 @@ export function Settings() {
         <h1 className="text-2xl font-semibold text-foreground">Settings</h1>
       </div>
 
-      {/* Settings sections (placeholder links for Phase 6) */}
-      <div className="space-y-2 mb-8">
-        {SETTINGS_SECTIONS.map(({ icon: Icon, label, desc }, i) => (
-          <motion.div
-            key={label}
-            initial={{ opacity: 0, x: -12 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ delay: i * 0.06 }}
-          >
-            <button className="w-full text-left flex items-center gap-4 p-4 rounded-xl border border-border bg-card hover:border-primary/40 hover:bg-muted/50 transition-all duration-150">
-              <div className="w-9 h-9 rounded-lg bg-primary/15 flex items-center justify-center shrink-0">
-                <Icon className="text-primary" size={18} />
-              </div>
-              <div>
-                <p className="text-sm font-medium text-foreground">{label}</p>
-                <p className="text-xs text-muted-foreground">{desc}</p>
-              </div>
-            </button>
-          </motion.div>
-        ))}
+      {/* Edit Profile (6F.4) */}
+      <EditProfileSection />
+
+      <Separator className="my-6" />
+
+      {/* Notification Preferences */}
+      <NotificationPreferencesSection />
+    </div>
+  )
+}
+
+// ── Edit Profile Section ─────────────────────────────────────────────────────
+
+function EditProfileSection() {
+  const { data: profile, isLoading } = useUserProfile()
+  const updateProfile = useUpdateProfile()
+
+  const [fullName, setFullName] = useState("")
+  const [phone, setPhone] = useState("")
+  const [avatarUrl, setAvatarUrl] = useState("")
+  const [uploading, setUploading] = useState(false)
+  const [saved, setSaved] = useState(false)
+  const [initialized, setInitialized] = useState(false)
+
+  const fileInputRef = useRef<HTMLInputElement>(null)
+
+  // Initialize form values when profile loads
+  if (profile && !initialized) {
+    setFullName(profile.fullName || "")
+    setPhone(profile.phone || "")
+    setAvatarUrl(profile.avatarUrl || "")
+    setInitialized(true)
+  }
+
+  const handleAvatarUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (!file) return
+
+    setUploading(true)
+    try {
+      const result = await uploadToCloudinary(file, "avatars")
+      setAvatarUrl(result.url)
+    } catch {
+      // Upload failed — user can retry
+    } finally {
+      setUploading(false)
+    }
+  }
+
+  const handleSave = () => {
+    setSaved(false)
+    updateProfile.mutate(
+      {
+        fullName: fullName.trim() || undefined,
+        phone: phone.trim() || undefined,
+        avatarUrl: avatarUrl || undefined,
+      },
+      {
+        onSuccess: () => {
+          setSaved(true)
+          setTimeout(() => setSaved(false), 3000)
+        },
+      }
+    )
+  }
+
+  const hasChanges =
+    initialized &&
+    profile &&
+    (fullName !== (profile.fullName || "") ||
+      phone !== (profile.phone || "") ||
+      avatarUrl !== (profile.avatarUrl || ""))
+
+  const initials = fullName
+    .split(" ")
+    .map((n) => n[0])
+    .join("")
+    .toUpperCase()
+    .slice(0, 2)
+
+  return (
+    <motion.section
+      initial={{ opacity: 0, y: 12 }}
+      animate={{ opacity: 1, y: 0 }}
+    >
+      <div className="flex items-center gap-2 mb-5">
+        <User className="text-primary" size={20} />
+        <h2 className="text-lg font-semibold text-foreground">Edit Profile</h2>
       </div>
 
-      <Separator className="my-6" />
+      {isLoading ? (
+        <div className="space-y-4">
+          <div className="flex items-center gap-4">
+            <Skeleton className="h-16 w-16 rounded-full" />
+            <div className="space-y-2">
+              <Skeleton className="h-4 w-32" />
+              <Skeleton className="h-3 w-24" />
+            </div>
+          </div>
+          <Skeleton className="h-10 w-full" />
+          <Skeleton className="h-10 w-full" />
+        </div>
+      ) : (
+        <div className="space-y-5 rounded-xl border border-border p-5 bg-card">
+          {/* Avatar upload */}
+          <div className="flex items-center gap-4">
+            <div className="relative group">
+              <Avatar className="h-16 w-16 border-2 border-zinc-700">
+                <AvatarImage src={avatarUrl || undefined} alt={fullName} />
+                <AvatarFallback className="bg-purple-500/20 text-purple-300 text-lg font-semibold">
+                  {initials || "?"}
+                </AvatarFallback>
+              </Avatar>
+              <button
+                onClick={() => fileInputRef.current?.click()}
+                disabled={uploading}
+                className="absolute inset-0 rounded-full bg-black/50 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
+              >
+                {uploading ? (
+                  <Loader2 className="h-5 w-5 text-white animate-spin" />
+                ) : (
+                  <Camera className="h-5 w-5 text-white" />
+                )}
+              </button>
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept="image/*"
+                onChange={handleAvatarUpload}
+                className="hidden"
+              />
+            </div>
+            <div>
+              <p className="text-sm font-medium text-foreground">Profile Photo</p>
+              <p className="text-xs text-muted-foreground">
+                Click to upload a new avatar
+              </p>
+            </div>
+          </div>
 
-      {/* Notification Preferences (5F.6 — real implementation) */}
-      <NotificationPreferencesSection />
+          {/* Full Name */}
+          <div className="space-y-2">
+            <Label htmlFor="fullName" className="text-sm text-zinc-400">
+              Full Name
+            </Label>
+            <Input
+              id="fullName"
+              value={fullName}
+              onChange={(e) => setFullName(e.target.value)}
+              placeholder="Your full name"
+              className="bg-zinc-950 border-zinc-800 text-zinc-200"
+            />
+          </div>
 
-      <Separator className="my-6" />
-      <p className="text-center text-sm text-muted-foreground">
-        Additional settings coming in Phase 6.
-      </p>
-    </div>
+          {/* Phone */}
+          <div className="space-y-2">
+            <Label htmlFor="phone" className="text-sm text-zinc-400 flex items-center gap-1">
+              <Phone className="h-3.5 w-3.5" />
+              Phone Number
+            </Label>
+            <Input
+              id="phone"
+              value={phone}
+              onChange={(e) => setPhone(e.target.value)}
+              placeholder="+91 9876543210"
+              className="bg-zinc-950 border-zinc-800 text-zinc-200"
+            />
+          </div>
+
+          {/* Save button */}
+          <div className="flex items-center gap-3 pt-1">
+            <Button
+              onClick={handleSave}
+              disabled={!hasChanges || updateProfile.isPending}
+              className="bg-purple-600 hover:bg-purple-700 text-white"
+            >
+              {updateProfile.isPending ? (
+                <>
+                  <Loader2 className="h-4 w-4 animate-spin mr-1.5" />
+                  Saving...
+                </>
+              ) : (
+                "Save Changes"
+              )}
+            </Button>
+            {saved && (
+              <motion.span
+                initial={{ opacity: 0, x: -8 }}
+                animate={{ opacity: 1, x: 0 }}
+                className="text-sm text-green-400 flex items-center gap-1"
+              >
+                <CheckCircle2 className="h-4 w-4" />
+                Saved
+              </motion.span>
+            )}
+            {updateProfile.isError && (
+              <span className="text-sm text-red-400">Failed to save. Please try again.</span>
+            )}
+          </div>
+        </div>
+      )}
+    </motion.section>
   )
 }
 

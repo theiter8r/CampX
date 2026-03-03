@@ -32,6 +32,7 @@ const UserManagement = lazy(() => import("./routes/admin/UserManagement"))
 const ListingModeration = lazy(() => import("./routes/admin/ListingModeration"))
 const TransactionManagement = lazy(() => import("./routes/admin/TransactionManagement"))
 const ReportsQueue = lazy(() => import("./routes/admin/ReportsQueue"))
+const CollegeManagement = lazy(() => import("./routes/admin/CollegeManagement"))
 
 /** Page-level fallback while lazy chunks load */
 function PageLoader() {
@@ -54,7 +55,7 @@ function ApiTokenSetup() {
 /** React Router application definition */
 export function App() {
   return (
-    <BrowserRouter>
+    <BrowserRouter future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
       <ApiTokenSetup />
       <Suspense fallback={<PageLoader />}>
         <Routes>
@@ -94,6 +95,7 @@ export function App() {
             <Route path="listings" element={<ListingModeration />} />
             <Route path="transactions" element={<TransactionManagement />} />
             <Route path="reports" element={<ReportsQueue />} />
+            <Route path="colleges" element={<CollegeManagement />} />
           </Route>
         </Routes>
       </Suspense>

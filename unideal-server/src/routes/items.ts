@@ -60,6 +60,7 @@ router.get(
         limit,
         category,
         college,
+        sellerId,
         type,
         condition,
         priceMin,
@@ -78,6 +79,9 @@ router.get(
       // Build where clause
       const where: Prisma.ItemWhereInput = { status: "AVAILABLE" }
 
+      if (sellerId) {
+        where.sellerId = sellerId
+      }
       if (category) {
         where.category = { slug: category }
       }

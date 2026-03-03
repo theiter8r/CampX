@@ -2,6 +2,7 @@
 // Unideal Server — Express 5 Entry Point
 // ============================================
 
+import "dotenv/config"
 import express from "express"
 import cors from "cors"
 import helmet from "helmet"
@@ -23,6 +24,8 @@ import walletRoutes from "./routes/wallet.js"
 import conversationRoutes from "./routes/conversations.js"
 import verificationRoutes from "./routes/verifications.js"
 import notificationRoutes from "./routes/notifications.js"
+import reviewRoutes from "./routes/reviews.js"
+import reportRoutes from "./routes/reports.js"
 import adminRoutes from "./routes/admin.js"
 import { requireAuth } from "./middleware/auth.js"
 import { createTokenRequest } from "./services/ably.js"
@@ -80,6 +83,8 @@ app.use("/api/wallet", walletRoutes)
 app.use("/api/conversations", conversationRoutes)
 app.use("/api/verifications", verificationRoutes)
 app.use("/api/notifications", notificationRoutes)
+app.use("/api/reviews", reviewRoutes)
+app.use("/api/reports", reportRoutes)
 app.use("/api/admin", adminRoutes)
 
 // Ably token authentication endpoint (5B.1)

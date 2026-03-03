@@ -55,6 +55,7 @@ export const browseItemsQuerySchema = z.object({
   limit: z.coerce.number().int().min(1).max(100).default(20),
   category: z.string().optional(),
   college: z.string().optional(),
+  sellerId: z.string().optional(),
   type: z.enum(["sell", "rent", "both"]).optional(),
   condition: z.enum(["new", "like_new", "used", "heavily_used"]).optional(),
   priceMin: z.coerce.number().nonnegative().optional(),

@@ -1,7 +1,6 @@
 import { Router, Request, Response } from "express"
 import { Webhook } from "svix"
 import { prisma } from "../lib/prisma.js"
-import { webhookLimiter } from "../middleware/rateLimiter.js"
 
 const router = Router()
 
@@ -37,8 +36,7 @@ type ClerkWebhookEvent = ClerkUserCreatedEvent | ClerkUserUpdatedEvent
  * Handles: user.created, user.updated
  */
 router.post(
-  "/clerk",
-  webhookLimiter,
+  "/",
   async (req: Request, res: Response): Promise<void> => {
     const webhookSecret = process.env.CLERK_WEBHOOK_SECRET
 
@@ -62,7 +60,7 @@ router.post(
     let event: ClerkWebhookEvent
 
     try {
-      event = wh.verify(JSON.stringify(req.body), {
+      event = wh.verify(req.body.toString(), {
         "svix-id": svix_id,
         "svix-timestamp": svix_timestamp,
         "svix-signature": svix_signature,

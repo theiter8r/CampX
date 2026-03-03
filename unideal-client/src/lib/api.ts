@@ -20,7 +20,7 @@ class ApiClient {
   private getToken: (() => Promise<string | null>) | null = null
 
   constructor() {
-    this.baseUrl = import.meta.env.VITE_API_URL ?? "http://localhost:5000"
+    this.baseUrl = import.meta.env.VITE_API_URL ?? "http://localhost:5001"
   }
 
   /**
@@ -64,7 +64,14 @@ class ApiClient {
       return undefined as unknown as T
     }
 
-    return response.json() as Promise<T>
+    const json = await response.json()
+
+    // Unwrap standard { success, data } envelope from the server
+    if (json && typeof json === "object" && "success" in json && "data" in json) {
+      return json.data as T
+    }
+
+    return json as T
   }
 
   /** GET request with optional query params */

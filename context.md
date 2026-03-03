@@ -1,6 +1,6 @@
 # Unideal — Project Context
 
-> **Last Updated**: 2026-02-26
+> **Last Updated**: 2025-07-24
 > **Version**: 2.0 (Complete Rewrite)
 > **Status**: Planning Complete → Phase 1 Ready
 
@@ -667,11 +667,17 @@ model Report {
 
 ## 6. API Endpoints (Complete)
 
+### Health & Infrastructure
+| Method | Path | Auth | Description |
+|---|---|---|---|
+| GET | `/health` | No | Health check (returns `{ status: "ok" }`) |
+| POST | `/api/ably/token` | Yes | Create Ably token request for real-time auth |
+
 ### Authentication & Webhooks
 | Method | Path | Auth | Description |
 |---|---|---|---|
 | POST | `/api/webhooks/clerk` | Webhook Secret | Clerk webhook → sync user creation/updates to DB |
-| POST | `/api/webhooks/razorpay` | Webhook Secret | Razorpay async payment status updates |
+| POST | `/api/payments/webhooks/razorpay` | Webhook Secret | Razorpay async payment status updates |
 
 ### Users & Profiles
 | Method | Path | Auth | Description |
@@ -680,6 +686,8 @@ model Report {
 | PUT | `/api/users/me` | Yes | Update profile (name, phone, avatar) |
 | POST | `/api/users/onboarding` | Yes | Complete onboarding (select college, set name) |
 | GET | `/api/users/:id` | No | Public user profile (name, college, rating, reviews) |
+| GET | `/api/users/me/notification-preferences` | Yes | Get notification preferences |
+| PUT | `/api/users/me/notification-preferences` | Yes | Update notification preferences |
 
 ### Colleges
 | Method | Path | Auth | Description |
@@ -741,7 +749,7 @@ model Report {
 | Method | Path | Auth | Description |
 |---|---|---|---|
 | POST | `/api/reviews` | Yes | Submit review for a settled transaction |
-| GET | `/api/users/:id/reviews` | No | Reviews for a user |
+| GET | `/api/reviews/user/:id` | No | Reviews for a user |
 
 ### Verifications
 | Method | Path | Auth | Description |
@@ -754,6 +762,7 @@ model Report {
 |---|---|---|---|
 | GET | `/api/notifications` | Yes | User's notifications (paginated) |
 | PATCH | `/api/notifications/read` | Yes | Mark notifications as read |
+| DELETE | `/api/notifications/:id` | Yes | Delete a single notification |
 
 ### Reports
 | Method | Path | Auth | Description |

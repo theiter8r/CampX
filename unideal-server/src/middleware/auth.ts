@@ -1,10 +1,53 @@
 import { Request, Response, NextFunction } from "express"
-import { verifyToken } from "@clerk/backend"
+import { verifyToken, createClerkClient } from "@clerk/backend"
 import { prisma } from "../lib/prisma.js"
+
+const clerk = createClerkClient({
+  secretKey: process.env.CLERK_SECRET_KEY!,
+})
+
+/**
+ * Fetches Clerk user data and creates a local DB user + wallet.
+ * Used as a fallback when the Clerk webhook hasn't fired yet.
+ */
+async function createUserFromClerk(clerkId: string) {
+  const clerkUser = await clerk.users.getUser(clerkId)
+
+  const primaryEmail = clerkUser.emailAddresses.find(
+    (e) => e.id === clerkUser.primaryEmailAddressId
+  )
+  const email = primaryEmail?.emailAddress ?? ""
+  const fullName =
+    [clerkUser.firstName, clerkUser.lastName].filter(Boolean).join(" ") ||
+    "Unideal User"
+
+  const user = await prisma.user.create({
+    data: {
+      clerkId,
+      email,
+      fullName,
+      avatarUrl: clerkUser.imageUrl ?? undefined,
+      wallet: { create: {} },
+    },
+    select: {
+      id: true,
+      clerkId: true,
+      email: true,
+      isAdmin: true,
+      isBanned: true,
+      verificationStatus: true,
+      onboardingComplete: true,
+    },
+  })
+
+  console.log(`[Auth fallback] Created user from Clerk: ${email}`)
+  return user
+}
 
 /**
  * Verifies Clerk session JWT from `Authorization: Bearer <token>` header.
  * Attaches `req.user` with DB user data including isAdmin and verificationStatus.
+ * Falls back to creating the user from Clerk API if webhook hasn't synced yet.
  */
 export async function requireAuth(
   req: Request,
@@ -30,7 +73,7 @@ export async function requireAuth(
     })
     const clerkId = payload.sub
 
-    const user = await prisma.user.findUnique({
+    let user = await prisma.user.findUnique({
       where: { clerkId },
       select: {
         id: true,
@@ -43,13 +86,19 @@ export async function requireAuth(
       },
     })
 
+    // Fallback: if webhook hasn't created the user yet, do it now
     if (!user) {
-      res.status(401).json({
-        success: false,
-        error: "User not found — please sign in again",
-        code: "USER_NOT_FOUND",
-      })
-      return
+      try {
+        user = await createUserFromClerk(clerkId)
+      } catch (createErr) {
+        console.error("[Auth fallback] Failed to create user:", createErr)
+        res.status(401).json({
+          success: false,
+          error: "User not found — please sign in again",
+          code: "USER_NOT_FOUND",
+        })
+        return
+      }
     }
 
     if (user.isBanned) {
