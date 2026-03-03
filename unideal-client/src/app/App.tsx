@@ -1,6 +1,6 @@
 import { useEffect } from "react"
 import { BrowserRouter, Routes, Route } from "react-router-dom"
-import { useAuth } from "@clerk/clerk-react"
+import { useAuth } from "@/contexts/AuthContext"
 import { api } from "@/lib/api"
 import { RootLayout } from "./layout/RootLayout"
 import { ProtectedRoute } from "./layout/ProtectedRoute"
@@ -23,6 +23,9 @@ const Verification = lazy(() => import("./routes/Verification").then((m) => ({ d
 const Favorites = lazy(() => import("./routes/Favorites").then((m) => ({ default: m.Favorites })))
 const SignIn = lazy(() => import("./routes/SignIn").then((m) => ({ default: m.SignIn })))
 const SignUp = lazy(() => import("./routes/SignUp").then((m) => ({ default: m.SignUp })))
+const VerifyEmail = lazy(() => import("./routes/VerifyEmail").then((m) => ({ default: m.VerifyEmail })))
+const ForgotPassword = lazy(() => import("./routes/ForgotPassword").then((m) => ({ default: m.ForgotPassword })))
+const ResetPassword = lazy(() => import("./routes/ResetPassword").then((m) => ({ default: m.ResetPassword })))
 const NotFound = lazy(() => import("./routes/NotFound").then((m) => ({ default: m.NotFound })))
 
 // Admin pages
@@ -43,7 +46,7 @@ function PageLoader() {
   )
 }
 
-/** Bootstraps the Clerk token getter into the API client */
+/** Bootstraps the JWT token getter into the API client */
 function ApiTokenSetup() {
   const { getToken } = useAuth()
   useEffect(() => {
@@ -66,7 +69,7 @@ export function App() {
             <Route path="/items/:id" element={<ItemDetail />} />
             <Route path="/profile/:id" element={<Profile />} />
 
-            {/* Protected routes — require Clerk auth */}
+            {/* Protected routes — require JWT auth */}
             <Route element={<ProtectedRoute />}>
               <Route path="/onboarding" element={<Onboarding />} />
               <Route path="/verification" element={<Verification />} />
@@ -83,9 +86,12 @@ export function App() {
             <Route path="*" element={<NotFound />} />
           </Route>
 
-          {/* Clerk auth pages — outside main layout for clean appearance */}
-          <Route path="/sign-in/*" element={<SignIn />} />
-          <Route path="/sign-up/*" element={<SignUp />} />
+          {/* Auth pages — outside main layout for clean appearance */}
+          <Route path="/sign-in" element={<SignIn />} />
+          <Route path="/sign-up" element={<SignUp />} />
+          <Route path="/verify-email" element={<VerifyEmail />} />
+          <Route path="/forgot-password" element={<ForgotPassword />} />
+          <Route path="/reset-password" element={<ResetPassword />} />
 
           {/* Admin panel — separate layout with sidebar, protected by isAdmin */}
           <Route path="/admin" element={<AdminLayout />}>

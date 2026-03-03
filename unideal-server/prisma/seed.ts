@@ -95,7 +95,7 @@ async function main() {
   // ── Users ────────────────────────────────────────────────────────────────────
   const userData = [
     {
-      clerkId: "user_seed_admin_001",
+      seedKey: "user_seed_admin_001",
       email: "admin@unideal.dev",
       fullName: "Unideal Admin",
       phone: "+919876543210",
@@ -106,7 +106,7 @@ async function main() {
       onboardingComplete: true,
     },
     {
-      clerkId: "user_seed_raaj_002",
+      seedKey: "user_seed_raaj_002",
       email: "raaj.patkar@spit.ac.in",
       fullName: "Raaj Patkar",
       phone: "+919812345678",
@@ -117,7 +117,7 @@ async function main() {
       onboardingComplete: true,
     },
     {
-      clerkId: "user_seed_priya_003",
+      seedKey: "user_seed_priya_003",
       email: "priya.sharma@spit.ac.in",
       fullName: "Priya Sharma",
       phone: "+919823456789",
@@ -128,7 +128,7 @@ async function main() {
       onboardingComplete: true,
     },
     {
-      clerkId: "user_seed_arjun_004",
+      seedKey: "user_seed_arjun_004",
       email: "arjun.mehta@ves.ac.in",
       fullName: "Arjun Mehta",
       phone: "+919834567890",
@@ -139,7 +139,7 @@ async function main() {
       onboardingComplete: true,
     },
     {
-      clerkId: "user_seed_sneha_005",
+      seedKey: "user_seed_sneha_005",
       email: "sneha.desai@djsce.ac.in",
       fullName: "Sneha Desai",
       phone: "+919845678901",
@@ -150,7 +150,7 @@ async function main() {
       onboardingComplete: true,
     },
     {
-      clerkId: "user_seed_rohan_006",
+      seedKey: "user_seed_rohan_006",
       email: "rohan.joshi@somaiya.edu",
       fullName: "Rohan Joshi",
       phone: "+919856789012",
@@ -161,7 +161,7 @@ async function main() {
       onboardingComplete: true,
     },
     {
-      clerkId: "user_seed_ananya_007",
+      seedKey: "user_seed_ananya_007",
       email: "ananya.iyer@tsec.ac.in",
       fullName: "Ananya Iyer",
       phone: "+919867890123",
@@ -172,7 +172,7 @@ async function main() {
       onboardingComplete: true,
     },
     {
-      clerkId: "user_seed_karan_008",
+      seedKey: "user_seed_karan_008",
       email: "karan.singh@spit.ac.in",
       fullName: "Karan Singh",
       phone: "+919878901234",
@@ -183,7 +183,7 @@ async function main() {
       onboardingComplete: true,
     },
     {
-      clerkId: "user_seed_neha_009",
+      seedKey: "user_seed_neha_009",
       email: "neha.gupta@ves.ac.in",
       fullName: "Neha Gupta",
       phone: "+919889012345",
@@ -194,7 +194,7 @@ async function main() {
       onboardingComplete: false,
     },
     {
-      clerkId: "user_seed_vikram_010",
+      seedKey: "user_seed_vikram_010",
       email: "vikram.rao@djsce.ac.in",
       fullName: "Vikram Rao",
       phone: "+919890123456",
@@ -208,17 +208,18 @@ async function main() {
 
   const users: Record<string, { id: string }> = {}
   for (const u of userData) {
-    const { collegeSlug, ...rest } = u
+    const { collegeSlug, seedKey, ...rest } = u
     const result = await prisma.user.upsert({
-      where: { clerkId: rest.clerkId },
+      where: { email: rest.email },
       update: {},
       create: {
         ...rest,
+        emailVerified: true,
         collegeId: colleges[collegeSlug].id,
         wallet: { create: {} },
       },
     })
-    users[rest.clerkId] = result
+    users[seedKey] = result
   }
   console.log(`✅ ${userData.length} users seeded (with wallets)`)
 

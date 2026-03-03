@@ -1,5 +1,5 @@
-import { NavLink } from "react-router-dom"
-import { useAuth, useUser, SignInButton } from "@clerk/clerk-react"
+import { NavLink, useNavigate } from "react-router-dom"
+import { useAuth } from "@/contexts/AuthContext"
 import {
   Sheet,
   SheetContent,
@@ -21,6 +21,7 @@ import {
   Settings,
   ShieldCheck,
   Plus,
+  LogOut,
 } from "lucide-react"
 
 interface MobileNavProps {
@@ -41,12 +42,10 @@ const LINKS = [
 
 /** Slide-out mobile navigation drawer */
 export function MobileNav({ open, onClose }: MobileNavProps) {
-  const { isSignedIn } = useAuth()
-  const { user } = useUser()
+  const { isSignedIn, user, logout } = useAuth()
+  const navigate = useNavigate()
 
-  const verificationStatus =
-    (user?.publicMetadata as { verificationStatus?: string })
-      ?.verificationStatus ?? "UNVERIFIED"
+  const verificationStatus = user?.verificationStatus ?? "UNVERIFIED"
 
   return (
     <Sheet open={open} onOpenChange={(v) => !v && onClose()}>
@@ -60,7 +59,7 @@ export function MobileNav({ open, onClose }: MobileNavProps) {
         {isSignedIn && user && (
           <div className="flex items-center gap-3 px-6 pb-4">
             <Avatar className="h-10 w-10">
-              <AvatarImage src={user.imageUrl} alt={user.fullName ?? ""} />
+              <AvatarImage src={user.avatarUrl ?? undefined} alt={user.fullName} />
               <AvatarFallback>
                 {(user.fullName ?? "U").slice(0, 1).toUpperCase()}
               </AvatarFallback>
@@ -70,7 +69,7 @@ export function MobileNav({ open, onClose }: MobileNavProps) {
                 {user.fullName}
               </p>
               <p className="truncate text-xs text-muted-foreground">
-                {user.primaryEmailAddress?.emailAddress}
+                {user.email}
               </p>
             </div>
             <VerificationBadge
@@ -105,18 +104,32 @@ export function MobileNav({ open, onClose }: MobileNavProps) {
 
         <Separator />
 
-        <div className="p-4">
+        <div className="flex flex-col gap-2 p-4">
           {isSignedIn ? (
-            <NavLink to={ROUTES.SELL} onClick={onClose}>
-              <Button className="w-full gap-2">
-                <Plus size={16} />
-                List an Item
+            <>
+              <NavLink to={ROUTES.SELL} onClick={onClose}>
+                <Button className="w-full gap-2">
+                  <Plus size={16} />
+                  List an Item
+                </Button>
+              </NavLink>
+              <Button
+                variant="ghost"
+                className="w-full gap-2 text-muted-foreground"
+                onClick={() => {
+                  logout()
+                  onClose()
+                  navigate(ROUTES.HOME)
+                }}
+              >
+                <LogOut size={16} />
+                Sign Out
               </Button>
-            </NavLink>
+            </>
           ) : (
-            <SignInButton mode="modal">
-              <Button className="w-full">Sign In</Button>
-            </SignInButton>
+            <Button className="w-full" onClick={() => { navigate(ROUTES.SIGN_IN); onClose() }}>
+              Sign In
+            </Button>
           )}
         </div>
       </SheetContent>

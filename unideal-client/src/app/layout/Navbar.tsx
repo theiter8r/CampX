@@ -1,10 +1,17 @@
 import { Link, NavLink, useNavigate } from "react-router-dom"
-import { useAuth, useUser, SignInButton, UserButton } from "@clerk/clerk-react"
+import { useAuth } from "@/contexts/AuthContext"
 import { motion } from "framer-motion"
-import { Menu, Plus } from "lucide-react"
+import { Menu, Plus, LogOut } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { VerificationBadge } from "@/components/ui/VerificationBadge"
 import { NotificationBell } from "@/components/notifications/NotificationBell"
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu"
 import { MobileNav } from "./MobileNav"
 import { useState } from "react"
 import { ROUTES } from "@/lib/constants"
@@ -18,14 +25,11 @@ const NAV_LINKS = [
 
 /** Top navigation bar — responsive, auth-aware */
 export function Navbar() {
-  const { isSignedIn, isLoaded } = useAuth()
-  const { user } = useUser()
+  const { isSignedIn, isLoaded, user, logout } = useAuth()
   const navigate = useNavigate()
   const [mobileOpen, setMobileOpen] = useState(false)
 
-  const verificationStatus =
-    (user?.publicMetadata as { verificationStatus?: string })
-      ?.verificationStatus ?? "UNVERIFIED"
+  const verificationStatus = user?.verificationStatus ?? "UNVERIFIED"
 
   return (
     <>
@@ -89,27 +93,43 @@ export function Navbar() {
                   size="sm"
                 />
 
-                {/* Clerk user button (avatar + dropdown) */}
-                <UserButton
-                  appearance={{
-                    elements: {
-                      avatarBox: "w-9 h-9 rounded-full ring-2 ring-border",
-                    },
-                  }}
-                />
+                {/* User avatar + dropdown */}
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <button className="rounded-full ring-2 ring-border focus:outline-none">
+                      <Avatar className="h-9 w-9">
+                        <AvatarImage src={user?.avatarUrl ?? undefined} alt={user?.fullName} />
+                        <AvatarFallback>
+                          {(user?.fullName ?? "U").slice(0, 1).toUpperCase()}
+                        </AvatarFallback>
+                      </Avatar>
+                    </button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end" className="w-44">
+                    <DropdownMenuItem onClick={() => navigate(ROUTES.SETTINGS)}>
+                      Settings
+                    </DropdownMenuItem>
+                    <DropdownMenuItem
+                      className="text-destructive focus:text-destructive"
+                      onClick={() => {
+                        logout()
+                        navigate(ROUTES.HOME)
+                      }}
+                    >
+                      <LogOut className="mr-2 h-4 w-4" />
+                      Sign out
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
               </>
             ) : isLoaded ? (
               <>
-                <SignInButton mode="modal">
-                  <Button variant="ghost" size="sm">
-                    Sign In
-                  </Button>
-                </SignInButton>
-                <SignInButton mode="modal">
-                  <Button size="sm">
-                    Get Started
-                  </Button>
-                </SignInButton>
+                <Button variant="ghost" size="sm" onClick={() => navigate(ROUTES.SIGN_IN)}>
+                  Sign In
+                </Button>
+                <Button size="sm" onClick={() => navigate(ROUTES.SIGN_UP)}>
+                  Get Started
+                </Button>
               </>
             ) : null}
 

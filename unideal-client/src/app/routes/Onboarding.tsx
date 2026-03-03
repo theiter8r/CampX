@@ -5,7 +5,7 @@
 import { useState, useCallback } from "react"
 import { useNavigate } from "react-router-dom"
 import { motion, AnimatePresence } from "framer-motion"
-import { useUser } from "@clerk/clerk-react"
+import { useAuth } from "@/contexts/AuthContext"
 import { z } from "zod"
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
@@ -81,7 +81,7 @@ const slideVariants = {
 
 export function Onboarding() {
   const navigate = useNavigate()
-  const { user: clerkUser } = useUser()
+  const { user: authUser, setUser } = useAuth()
   const { mutateAsync: submitOnboarding, isPending: isSubmitting } =
     useOnboarding()
   const { data: colleges, isLoading: collegesLoading } = useColleges()
@@ -94,7 +94,7 @@ export function Onboarding() {
   const profileForm = useForm<ProfileValues>({
     resolver: zodResolver(profileSchema),
     defaultValues: {
-      fullName: clerkUser?.fullName ?? "",
+      fullName: authUser?.fullName ?? "",
       phone: "",
     },
   })
@@ -131,24 +131,29 @@ export function Onboarding() {
     const college = collegeForm.getValues()
 
     try {
-      await submitOnboarding({
+      const updated = await submitOnboarding({
         fullName: profile.fullName,
         phone: profile.phone,
         collegeId: college.collegeId,
         avatarUrl: avatar[0]?.url,
       })
 
-      // Update Clerk public metadata so ProtectedRoute stops redirecting
-      await clerkUser?.update({
-        unsafeMetadata: { onboardingComplete: true },
-      })
+      // Update local auth state so ProtectedRoute stops redirecting
+      if (authUser) {
+        setUser({
+          ...authUser,
+          fullName: updated.fullName ?? authUser.fullName,
+          onboardingComplete: true,
+          ...(updated.avatarUrl && { avatarUrl: updated.avatarUrl }),
+        })
+      }
 
       toast.success("Welcome to Unideal! 🎉")
       navigate(ROUTES.BROWSE, { replace: true })
     } catch {
       toast.error("Something went wrong. Please try again.")
     }
-  }, [profileForm, collegeForm, avatar, submitOnboarding, clerkUser, navigate])
+  }, [profileForm, collegeForm, avatar, submitOnboarding, authUser, setUser, navigate])
 
   return (
     <div className="mx-auto flex min-h-[70vh] max-w-lg flex-col items-center justify-center px-4 py-10">

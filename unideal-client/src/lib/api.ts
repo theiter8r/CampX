@@ -1,5 +1,5 @@
 // ============================================
-// API Client — Clerk-authenticated fetch wrapper
+// API Client — JWT-authenticated fetch wrapper
 // ============================================
 
 import { buildSearchParams } from "@/lib/utils"
@@ -24,7 +24,7 @@ class ApiClient {
   }
 
   /**
-   * Registers the Clerk token getter. Call this once inside a
+   * Registers the JWT token getter. Call this once inside a
    * React component tree that has access to `useAuth()`.
    */
   setTokenGetter(getter: () => Promise<string | null>) {

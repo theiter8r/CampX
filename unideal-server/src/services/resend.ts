@@ -4,6 +4,80 @@ import { prisma } from "../lib/prisma.js"
 const resend = new Resend(process.env.RESEND_API_KEY ?? "")
 
 const FROM_EMAIL = process.env.RESEND_FROM_EMAIL ?? "Unideal <noreply@unideal.in>"
+const FRONTEND_URL = process.env.FRONTEND_URL ?? "http://localhost:5173"
+
+// ── Auth Emails ────────────────────────────────────────────────────────────
+
+/**
+ * Sends an email verification link to a newly registered user.
+ *
+ * @param email    - Recipient email address
+ * @param fullName - Recipient's full name
+ * @param token    - Email verification token
+ */
+export async function sendEmailVerificationEmail(
+  email: string,
+  fullName: string,
+  token: string
+): Promise<void> {
+  const verifyUrl = `${FRONTEND_URL}/verify-email?token=${token}`
+  await resend.emails.send({
+    from: FROM_EMAIL,
+    to: email,
+    subject: "Verify your Unideal account ✉️",
+    html: `
+      <div style="font-family: sans-serif; max-width: 480px; margin: 0 auto;">
+        <h2 style="color: #A855F7;">Welcome to Unideal, ${fullName}!</h2>
+        <p>Please verify your email address to activate your account.</p>
+        <p style="margin: 24px 0;">
+          <a href="${verifyUrl}"
+             style="background: #A855F7; color: white; padding: 12px 24px; border-radius: 8px; text-decoration: none; font-weight: 600;">
+            Verify Email
+          </a>
+        </p>
+        <p style="color: #888; font-size: 13px;">This link expires in 24 hours. If you didn't create an account, you can safely ignore this email.</p>
+        <hr style="border: none; border-top: 1px solid #eee; margin: 24px 0;" />
+        <p style="font-size: 12px; color: #888;">Unideal — Your Campus Marketplace</p>
+      </div>
+    `,
+  })
+}
+
+/**
+ * Sends a password reset link to the user.
+ *
+ * @param email    - Recipient email address
+ * @param fullName - Recipient's full name
+ * @param token    - Password reset token
+ */
+export async function sendPasswordResetEmail(
+  email: string,
+  fullName: string,
+  token: string
+): Promise<void> {
+  const resetUrl = `${FRONTEND_URL}/reset-password?token=${token}`
+  await resend.emails.send({
+    from: FROM_EMAIL,
+    to: email,
+    subject: "Reset your Unideal password 🔑",
+    html: `
+      <div style="font-family: sans-serif; max-width: 480px; margin: 0 auto;">
+        <h2 style="color: #A855F7;">Password Reset Request</h2>
+        <p>Hi ${fullName},</p>
+        <p>We received a request to reset your password. Click the button below to create a new one.</p>
+        <p style="margin: 24px 0;">
+          <a href="${resetUrl}"
+             style="background: #A855F7; color: white; padding: 12px 24px; border-radius: 8px; text-decoration: none; font-weight: 600;">
+            Reset Password
+          </a>
+        </p>
+        <p style="color: #888; font-size: 13px;">This link expires in 1 hour. If you didn't request a password reset, you can safely ignore this email.</p>
+        <hr style="border: none; border-top: 1px solid #eee; margin: 24px 0;" />
+        <p style="font-size: 12px; color: #888;">Unideal — Your Campus Marketplace</p>
+      </div>
+    `,
+  })
+}
 
 // ── Notification Preference Check ──────────────────────────────────────────
 

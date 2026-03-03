@@ -1,53 +1,17 @@
 import { Request, Response, NextFunction } from "express"
-import { verifyToken, createClerkClient } from "@clerk/backend"
+import jwt from "jsonwebtoken"
 import { prisma } from "../lib/prisma.js"
 
-const clerk = createClerkClient({
-  secretKey: process.env.CLERK_SECRET_KEY!,
-})
+const JWT_SECRET = process.env.JWT_SECRET
 
-/**
- * Fetches Clerk user data and creates a local DB user + wallet.
- * Used as a fallback when the Clerk webhook hasn't fired yet.
- */
-async function createUserFromClerk(clerkId: string) {
-  const clerkUser = await clerk.users.getUser(clerkId)
-
-  const primaryEmail = clerkUser.emailAddresses.find(
-    (e) => e.id === clerkUser.primaryEmailAddressId
-  )
-  const email = primaryEmail?.emailAddress ?? ""
-  const fullName =
-    [clerkUser.firstName, clerkUser.lastName].filter(Boolean).join(" ") ||
-    "Unideal User"
-
-  const user = await prisma.user.create({
-    data: {
-      clerkId,
-      email,
-      fullName,
-      avatarUrl: clerkUser.imageUrl ?? undefined,
-      wallet: { create: {} },
-    },
-    select: {
-      id: true,
-      clerkId: true,
-      email: true,
-      isAdmin: true,
-      isBanned: true,
-      verificationStatus: true,
-      onboardingComplete: true,
-    },
-  })
-
-  console.log(`[Auth fallback] Created user from Clerk: ${email}`)
-  return user
+if (!JWT_SECRET) {
+  console.error("FATAL: JWT_SECRET environment variable is not set.")
+  process.exit(1)
 }
 
 /**
- * Verifies Clerk session JWT from `Authorization: Bearer <token>` header.
+ * Verifies the JWT from `Authorization: Bearer <token>` header.
  * Attaches `req.user` with DB user data including isAdmin and verificationStatus.
- * Falls back to creating the user from Clerk API if webhook hasn't synced yet.
  */
 export async function requireAuth(
   req: Request,
@@ -68,16 +32,13 @@ export async function requireAuth(
   const token = authHeader.slice(7)
 
   try {
-    const payload = await verifyToken(token, {
-      secretKey: process.env.CLERK_SECRET_KEY!,
-    })
-    const clerkId = payload.sub
+    const payload = jwt.verify(token, JWT_SECRET!) as jwt.JwtPayload
+    const userId = payload.sub as string
 
-    let user = await prisma.user.findUnique({
-      where: { clerkId },
+    const user = await prisma.user.findUnique({
+      where: { id: userId },
       select: {
         id: true,
-        clerkId: true,
         email: true,
         isAdmin: true,
         isBanned: true,
@@ -86,19 +47,13 @@ export async function requireAuth(
       },
     })
 
-    // Fallback: if webhook hasn't created the user yet, do it now
     if (!user) {
-      try {
-        user = await createUserFromClerk(clerkId)
-      } catch (createErr) {
-        console.error("[Auth fallback] Failed to create user:", createErr)
-        res.status(401).json({
-          success: false,
-          error: "User not found — please sign in again",
-          code: "USER_NOT_FOUND",
-        })
-        return
-      }
+      res.status(401).json({
+        success: false,
+        error: "User not found — please sign in again",
+        code: "USER_NOT_FOUND",
+      })
+      return
     }
 
     if (user.isBanned) {
@@ -112,7 +67,6 @@ export async function requireAuth(
 
     req.user = {
       id: user.id,
-      clerkId: user.clerkId,
       email: user.email,
       isAdmin: user.isAdmin,
       verificationStatus: user.verificationStatus,

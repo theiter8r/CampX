@@ -2,8 +2,6 @@
 export interface AuthUser {
   /** Internal DB user ID (cuid) */
   id: string
-  /** Clerk external user ID */
-  clerkId: string
   email: string
   isAdmin: boolean
   verificationStatus: string

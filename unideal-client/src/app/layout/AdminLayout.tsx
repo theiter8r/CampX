@@ -1,5 +1,5 @@
-import { Outlet, NavLink, Navigate } from "react-router-dom"
-import { useUser } from "@clerk/clerk-react"
+import { Outlet, NavLink, Navigate, useNavigate } from "react-router-dom"
+import { useAuth } from "@/contexts/AuthContext"
 import {
   LayoutDashboard,
   ShieldCheck,
@@ -31,11 +31,12 @@ const navItems = [
 
 /**
  * AdminLayout — wraps all /admin/* routes.
- * Checks Clerk public metadata for the `isAdmin` flag.
+ * Checks isAdmin from JWT auth context.
  * Renders a sidebar-based shell for admin pages.
  */
 export function AdminLayout() {
-  const { user, isLoaded } = useUser()
+  const { user, isLoaded, logout } = useAuth()
+  const navigate = useNavigate()
   const [sidebarOpen, setSidebarOpen] = useState(false)
 
   if (!isLoaded) {
@@ -46,9 +47,8 @@ export function AdminLayout() {
     )
   }
 
-  // Gate: only users with isAdmin metadata can access
-  const isAdmin = user?.publicMetadata?.isAdmin === true
-  if (!isAdmin) {
+  // Gate: only users with isAdmin flag can access
+  if (!user?.isAdmin) {
     return <Navigate to="/" replace />
   }
 
@@ -109,24 +109,26 @@ export function AdminLayout() {
       {/* Admin identity footer */}
       <div className="flex items-center gap-3 p-4">
         <Avatar className="h-8 w-8">
-          <AvatarImage src={user?.imageUrl} />
-          <AvatarFallback>{user?.firstName?.[0] ?? "A"}</AvatarFallback>
+          <AvatarImage src={user?.avatarUrl ?? undefined} />
+          <AvatarFallback>{user?.fullName?.[0] ?? "A"}</AvatarFallback>
         </Avatar>
         <div className="min-w-0 flex-1">
           <p className="truncate text-sm font-medium">{user?.fullName ?? "Admin"}</p>
           <p className="truncate text-xs text-muted-foreground">
-            {user?.primaryEmailAddress?.emailAddress}
+            {user?.email}
           </p>
         </div>
         <Button
           variant="ghost"
           size="icon"
           className="shrink-0 text-muted-foreground hover:text-destructive"
-          asChild
+          title="Sign out"
+          onClick={() => {
+            logout()
+            navigate("/")
+          }}
         >
-          <a href="/" title="Back to site">
-            <LogOut className="h-4 w-4" />
-          </a>
+          <LogOut className="h-4 w-4" />
         </Button>
       </div>
     </aside>
