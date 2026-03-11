@@ -4,7 +4,7 @@ Welcome to the **CampX** project!
 
 **CampX** is a hyper-local, trust-first, peer-to-peer marketplace exclusively for university students. It enables buying, selling, and renting items (textbooks, electronics, furniture, sports gear, clothing, etc.) within and across campus communities.
 
-For comprehensive documentation, please refer to the [CampX Wiki](https://github.com/theiter8r/miniproject-campx/wiki), which covers the following:
+For comprehensive documentation, please refer to the [CampX Wiki](https://github.com/theiter8r/campx/wiki), which covers the following:
 
 *   **Architecture & Tech Stack:** Details on the frontend (React/Vite/TypeScript on Vercel), backend (Node.js/Express/Prisma on Railway), and third-party services.
 *   **Database Schema:** A visual representation of the PostgreSQL schema.
