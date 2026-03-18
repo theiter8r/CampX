@@ -183,7 +183,8 @@ router.get(
   async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
       const revieweeId = req.params.id as string
-      const { cursor, limit } = req.query as unknown as { cursor?: string; limit: number }
+      const { cursor, limit: limitStr } = req.query as unknown as { cursor?: string; limit: string | number }
+      const limit = Number(limitStr) || 100
 
       // Verify user exists
       const user = await prisma.user.findUnique({

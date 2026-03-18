@@ -127,8 +127,10 @@ model College {
 
 model User {
   id                      String             @id @default(cuid())
-  clerkId                 String             @unique
   email                   String             @unique
+  passwordHash            String
+  emailVerified           Boolean            @default(false)
+  emailVerifyToken        String?
   fullName                String
   phone                   String?
   avatarUrl               String?
@@ -157,7 +159,6 @@ model User {
   reportsMade          Report[]       @relation("ReporterReports")
   reportsReceived      Report[]       @relation("ReportedUserReports")
 
-  @@index([clerkId])
   @@index([collegeId])
   @@index([email])
 }

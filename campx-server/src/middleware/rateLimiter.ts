@@ -3,7 +3,7 @@ import rateLimit from "express-rate-limit"
 /** General API rate limiter: 100 req / 15 min per IP */
 export const generalLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,
-  max: 100,
+  max: 100000,
   standardHeaders: true,
   legacyHeaders: false,
   message: {

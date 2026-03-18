@@ -23,7 +23,6 @@ router.get(
         where: { id: req.user!.id },
         select: {
           id: true,
-          clerkId: true,
           email: true,
           fullName: true,
           phone: true,

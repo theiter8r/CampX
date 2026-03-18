@@ -160,13 +160,11 @@ router.get(
       const authHeader = req.headers.authorization
       if (authHeader?.startsWith("Bearer ")) {
         try {
-          const { verifyToken } = await import("@clerk/backend")
+          const jwtLib = await import("jsonwebtoken")
           const token = authHeader.slice(7)
-          const payload = await verifyToken(token, {
-            secretKey: process.env.CLERK_SECRET_KEY!,
-          })
+          const payload = jwtLib.default.verify(token, process.env.JWT_SECRET!) as { sub: string }
           const user = await prisma.user.findUnique({
-            where: { clerkId: payload.sub },
+            where: { id: payload.sub },
             select: { id: true },
           })
           if (user) {
@@ -274,13 +272,11 @@ router.get(
       const authHeader = req.headers.authorization
       if (authHeader?.startsWith("Bearer ")) {
         try {
-          const { verifyToken } = await import("@clerk/backend")
+          const jwtLib = await import("jsonwebtoken")
           const token = authHeader.slice(7)
-          const payload = await verifyToken(token, {
-            secretKey: process.env.CLERK_SECRET_KEY!,
-          })
+          const payload = jwtLib.default.verify(token, process.env.JWT_SECRET!) as { sub: string }
           const user = await prisma.user.findUnique({
-            where: { clerkId: payload.sub },
+            where: { id: payload.sub },
             select: { id: true },
           })
           if (user) {
