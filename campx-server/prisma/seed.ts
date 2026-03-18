@@ -1,10 +1,14 @@
 import "dotenv/config"
 import { PrismaClient } from "@prisma/client"
+import bcrypt from "bcrypt"
 
 const prisma = new PrismaClient()
 
 async function main() {
   console.log("🌱 Seeding database...")
+
+  // Pre-hash a common password for all seed users
+  const seedPassword = await bcrypt.hash("password123", 12)
 
   // ── Categories ──────────────────────────────────────────────────────────────
   const categoryData = [
@@ -95,9 +99,11 @@ async function main() {
   // ── Users ────────────────────────────────────────────────────────────────────
   const userData = [
     {
-      clerkId: "user_seed_admin_001",
-      email: "admin@campx.dev",
-      fullName: "CampX Admin",
+      seedKey: "user_seed_admin_001",
+      email: "admin@unideal.dev",
+      passwordHash: seedPassword,
+      emailVerified: true,
+      fullName: "Unideal Admin",
       phone: "+919876543210",
       avatarUrl: "https://api.dicebear.com/7.x/avataaars/svg?seed=admin",
       collegeSlug: "spit",
@@ -106,8 +112,10 @@ async function main() {
       onboardingComplete: true,
     },
     {
-      clerkId: "user_seed_raaj_002",
+      seedKey: "user_seed_raaj_002",
       email: "raaj.patkar@spit.ac.in",
+      passwordHash: seedPassword,
+      emailVerified: true,
       fullName: "Raaj Patkar",
       phone: "+919812345678",
       avatarUrl: "https://api.dicebear.com/7.x/avataaars/svg?seed=raaj",
@@ -117,8 +125,10 @@ async function main() {
       onboardingComplete: true,
     },
     {
-      clerkId: "user_seed_priya_003",
+      seedKey: "user_seed_priya_003",
       email: "priya.sharma@spit.ac.in",
+      passwordHash: seedPassword,
+      emailVerified: true,
       fullName: "Priya Sharma",
       phone: "+919823456789",
       avatarUrl: "https://api.dicebear.com/7.x/avataaars/svg?seed=priya",
@@ -128,8 +138,10 @@ async function main() {
       onboardingComplete: true,
     },
     {
-      clerkId: "user_seed_arjun_004",
+      seedKey: "user_seed_arjun_004",
       email: "arjun.mehta@ves.ac.in",
+      passwordHash: seedPassword,
+      emailVerified: true,
       fullName: "Arjun Mehta",
       phone: "+919834567890",
       avatarUrl: "https://api.dicebear.com/7.x/avataaars/svg?seed=arjun",
@@ -139,8 +151,10 @@ async function main() {
       onboardingComplete: true,
     },
     {
-      clerkId: "user_seed_sneha_005",
+      seedKey: "user_seed_sneha_005",
       email: "sneha.desai@djsce.ac.in",
+      passwordHash: seedPassword,
+      emailVerified: true,
       fullName: "Sneha Desai",
       phone: "+919845678901",
       avatarUrl: "https://api.dicebear.com/7.x/avataaars/svg?seed=sneha",
@@ -150,8 +164,10 @@ async function main() {
       onboardingComplete: true,
     },
     {
-      clerkId: "user_seed_rohan_006",
+      seedKey: "user_seed_rohan_006",
       email: "rohan.joshi@somaiya.edu",
+      passwordHash: seedPassword,
+      emailVerified: true,
       fullName: "Rohan Joshi",
       phone: "+919856789012",
       avatarUrl: "https://api.dicebear.com/7.x/avataaars/svg?seed=rohan",
@@ -161,8 +177,10 @@ async function main() {
       onboardingComplete: true,
     },
     {
-      clerkId: "user_seed_ananya_007",
+      seedKey: "user_seed_ananya_007",
       email: "ananya.iyer@tsec.ac.in",
+      passwordHash: seedPassword,
+      emailVerified: true,
       fullName: "Ananya Iyer",
       phone: "+919867890123",
       avatarUrl: "https://api.dicebear.com/7.x/avataaars/svg?seed=ananya",
@@ -172,8 +190,10 @@ async function main() {
       onboardingComplete: true,
     },
     {
-      clerkId: "user_seed_karan_008",
+      seedKey: "user_seed_karan_008",
       email: "karan.singh@spit.ac.in",
+      passwordHash: seedPassword,
+      emailVerified: true,
       fullName: "Karan Singh",
       phone: "+919878901234",
       avatarUrl: "https://api.dicebear.com/7.x/avataaars/svg?seed=karan",
@@ -183,8 +203,10 @@ async function main() {
       onboardingComplete: true,
     },
     {
-      clerkId: "user_seed_neha_009",
+      seedKey: "user_seed_neha_009",
       email: "neha.gupta@ves.ac.in",
+      passwordHash: seedPassword,
+      emailVerified: false,
       fullName: "Neha Gupta",
       phone: "+919889012345",
       avatarUrl: "https://api.dicebear.com/7.x/avataaars/svg?seed=neha",
@@ -194,8 +216,10 @@ async function main() {
       onboardingComplete: false,
     },
     {
-      clerkId: "user_seed_vikram_010",
+      seedKey: "user_seed_vikram_010",
       email: "vikram.rao@djsce.ac.in",
+      passwordHash: seedPassword,
+      emailVerified: true,
       fullName: "Vikram Rao",
       phone: "+919890123456",
       avatarUrl: "https://api.dicebear.com/7.x/avataaars/svg?seed=vikram",
@@ -208,9 +232,9 @@ async function main() {
 
   const users: Record<string, { id: string }> = {}
   for (const u of userData) {
-    const { collegeSlug, ...rest } = u
+    const { collegeSlug, seedKey, ...rest } = u
     const result = await prisma.user.upsert({
-      where: { clerkId: rest.clerkId },
+      where: { email: rest.email },
       update: {},
       create: {
         ...rest,
@@ -218,7 +242,7 @@ async function main() {
         wallet: { create: {} },
       },
     })
-    users[rest.clerkId] = result
+    users[seedKey] = result
   }
   console.log(`✅ ${userData.length} users seeded (with wallets)`)
 
@@ -226,7 +250,7 @@ async function main() {
   const itemData = [
     // Books & Notes
     {
-      sellerClerkId: "user_seed_raaj_002",
+      sellerSeedKey: "user_seed_raaj_002",
       collegeSlug: "spit",
       categorySlug: "books-notes",
       title: "Engineering Mathematics III — Kreyszig 10th Ed",
@@ -241,7 +265,7 @@ async function main() {
       pickupLng: 72.8377,
     },
     {
-      sellerClerkId: "user_seed_priya_003",
+      sellerSeedKey: "user_seed_priya_003",
       collegeSlug: "spit",
       categorySlug: "books-notes",
       title: "DSA Handwritten Notes — Full Semester",
@@ -256,7 +280,7 @@ async function main() {
       pickupLng: 72.8373,
     },
     {
-      sellerClerkId: "user_seed_arjun_004",
+      sellerSeedKey: "user_seed_arjun_004",
       collegeSlug: "vesit",
       categorySlug: "books-notes",
       title: "DBMS Textbook — Korth 7th Edition",
@@ -272,7 +296,7 @@ async function main() {
     },
     // Electronics
     {
-      sellerClerkId: "user_seed_karan_008",
+      sellerSeedKey: "user_seed_karan_008",
       collegeSlug: "spit",
       categorySlug: "electronics",
       title: "Logitech G502 Gaming Mouse",
@@ -287,7 +311,7 @@ async function main() {
       pickupLng: 72.8379,
     },
     {
-      sellerClerkId: "user_seed_sneha_005",
+      sellerSeedKey: "user_seed_sneha_005",
       collegeSlug: "djsce",
       categorySlug: "electronics",
       title: "iPad Air 5th Gen — 64GB WiFi",
@@ -302,7 +326,7 @@ async function main() {
       pickupLng: 72.8416,
     },
     {
-      sellerClerkId: "user_seed_vikram_010",
+      sellerSeedKey: "user_seed_vikram_010",
       collegeSlug: "djsce",
       categorySlug: "electronics",
       title: "Raspberry Pi 4 Model B — 4GB RAM",
@@ -317,7 +341,7 @@ async function main() {
       pickupLng: 72.8414,
     },
     {
-      sellerClerkId: "user_seed_ananya_007",
+      sellerSeedKey: "user_seed_ananya_007",
       collegeSlug: "tsec",
       categorySlug: "electronics",
       title: "Sony WH-1000XM4 Headphones",
@@ -333,7 +357,7 @@ async function main() {
     },
     // Furniture
     {
-      sellerClerkId: "user_seed_raaj_002",
+      sellerSeedKey: "user_seed_raaj_002",
       collegeSlug: "spit",
       categorySlug: "furniture",
       title: "IKEA MARKUS Office Chair — Black",
@@ -348,7 +372,7 @@ async function main() {
       pickupLng: 72.8380,
     },
     {
-      sellerClerkId: "user_seed_rohan_006",
+      sellerSeedKey: "user_seed_rohan_006",
       collegeSlug: "kjsce",
       categorySlug: "furniture",
       title: "Foldable Study Table — Portable",
@@ -364,7 +388,7 @@ async function main() {
     },
     // Sports & Fitness
     {
-      sellerClerkId: "user_seed_arjun_004",
+      sellerSeedKey: "user_seed_arjun_004",
       collegeSlug: "vesit",
       categorySlug: "sports-fitness",
       title: "Yonex Nanoray Light 18i Badminton Racket",
@@ -379,7 +403,7 @@ async function main() {
       pickupLng: 72.8956,
     },
     {
-      sellerClerkId: "user_seed_karan_008",
+      sellerSeedKey: "user_seed_karan_008",
       collegeSlug: "spit",
       categorySlug: "sports-fitness",
       title: "10kg Adjustable Dumbbell Set — Pair",
@@ -395,7 +419,7 @@ async function main() {
     },
     // Clothing & Accessories
     {
-      sellerClerkId: "user_seed_priya_003",
+      sellerSeedKey: "user_seed_priya_003",
       collegeSlug: "spit",
       categorySlug: "clothing-accessories",
       title: "Levi's 511 Slim Fit Jeans — Size 32",
@@ -410,7 +434,7 @@ async function main() {
       pickupLng: 72.8376,
     },
     {
-      sellerClerkId: "user_seed_ananya_007",
+      sellerSeedKey: "user_seed_ananya_007",
       collegeSlug: "tsec",
       categorySlug: "clothing-accessories",
       title: "Wildcraft 45L Trekking Backpack",
@@ -427,7 +451,7 @@ async function main() {
     },
     // Miscellaneous
     {
-      sellerClerkId: "user_seed_sneha_005",
+      sellerSeedKey: "user_seed_sneha_005",
       collegeSlug: "djsce",
       categorySlug: "miscellaneous",
       title: "TI-84 Plus CE Graphing Calculator",
@@ -443,7 +467,7 @@ async function main() {
       pickupLng: 72.8415,
     },
     {
-      sellerClerkId: "user_seed_vikram_010",
+      sellerSeedKey: "user_seed_vikram_010",
       collegeSlug: "djsce",
       categorySlug: "miscellaneous",
       title: "Arduino Mega Starter Kit",
@@ -458,7 +482,7 @@ async function main() {
       pickupLng: 72.8413,
     },
     {
-      sellerClerkId: "user_seed_rohan_006",
+      sellerSeedKey: "user_seed_rohan_006",
       collegeSlug: "kjsce",
       categorySlug: "miscellaneous",
       title: "Whiteboard with Markers — 3x2 ft",
@@ -474,7 +498,7 @@ async function main() {
     },
     // SOLD items
     {
-      sellerClerkId: "user_seed_raaj_002",
+      sellerSeedKey: "user_seed_raaj_002",
       collegeSlug: "spit",
       categorySlug: "electronics",
       title: "Keychron K2 Mechanical Keyboard — Brown Switches",
@@ -489,7 +513,7 @@ async function main() {
       pickupLng: 72.8377,
     },
     {
-      sellerClerkId: "user_seed_priya_003",
+      sellerSeedKey: "user_seed_priya_003",
       collegeSlug: "spit",
       categorySlug: "books-notes",
       title: "Operating Systems — Galvin 9th Edition",
@@ -505,7 +529,7 @@ async function main() {
     },
     // Rent-only
     {
-      sellerClerkId: "user_seed_karan_008",
+      sellerSeedKey: "user_seed_karan_008",
       collegeSlug: "spit",
       categorySlug: "electronics",
       title: "GoPro Hero 11 Black — Rent Only",
@@ -521,12 +545,12 @@ async function main() {
     },
   ]
 
-  const items: Array<{ id: string; sellerClerkId: string; title: string; status: string }> = []
+  const items: Array<{ id: string; sellerSeedKey: string; title: string; status: string }> = []
   for (const item of itemData) {
-    const { sellerClerkId, collegeSlug, categorySlug, ...rest } = item
+    const { sellerSeedKey, collegeSlug, categorySlug, ...rest } = item
     const result = await prisma.item.create({
       data: {
-        sellerId: users[sellerClerkId].id,
+        sellerId: users[sellerSeedKey].id,
         collegeId: colleges[collegeSlug].id,
         categoryId: categories[categorySlug].id,
         ...rest,
@@ -534,7 +558,7 @@ async function main() {
         rentPricePerDay: rest.rentPricePerDay ?? null,
       },
     })
-    items.push({ id: result.id, sellerClerkId, title: rest.title, status: rest.status })
+    items.push({ id: result.id, sellerSeedKey, title: rest.title, status: rest.status })
   }
   console.log(`✅ ${items.length} items seeded`)
 

@@ -3,9 +3,91 @@ import { prisma } from "../lib/prisma.js"
 
 const resend = new Resend(process.env.RESEND_API_KEY ?? "")
 
-const FROM_EMAIL = process.env.RESEND_FROM_EMAIL ?? "CampX <noreply@campx.in>"
+const FROM_EMAIL = process.env.RESEND_FROM_EMAIL ?? "Unideal <noreply@raajpatkar.me>"
 
 // ── Notification Preference Check ──────────────────────────────────────────
+
+// Frontend URL for constructing verification links
+const FRONTEND_URL = process.env.FRONTEND_URL ?? "http://localhost:5173"
+
+// ── Email Verification ─────────────────────────────────────────────────────
+
+/**
+ * Sends an email verification link to a newly registered user.
+ *
+ * @param email    - Recipient email address
+ * @param fullName - Recipient's full name
+ * @param token    - Email verification token
+ */
+export async function sendVerificationEmail(
+  email: string,
+  fullName: string,
+  token: string
+): Promise<void> {
+  const verifyUrl = `${FRONTEND_URL}/verify-email?token=${token}`
+
+  await resend.emails.send({
+    from: FROM_EMAIL,
+    to: email,
+    subject: "Verify your Unideal account",
+    html: `
+      <div style="font-family: sans-serif; max-width: 480px; margin: 0 auto;">
+        <h2 style="color: #A855F7;">Welcome to Unideal, ${fullName}!</h2>
+        <p>Thanks for signing up. Please verify your email address by clicking the button below:</p>
+        <div style="text-align: center; margin: 32px 0;">
+          <a href="${verifyUrl}" style="background: #A855F7; color: #fff; text-decoration: none; padding: 12px 32px; border-radius: 8px; font-weight: 600; display: inline-block;">
+            Verify Email
+          </a>
+        </div>
+        <p style="font-size: 13px; color: #666;">Or copy and paste this link: <br/>${verifyUrl}</p>
+        <p style="font-size: 13px; color: #666;">This link expires in 24 hours. If you didn't create an account, you can safely ignore this email.</p>
+        <hr style="border: none; border-top: 1px solid #eee; margin: 24px 0;" />
+        <p style="font-size: 12px; color: #888;">Unideal — Your Campus Marketplace</p>
+      </div>
+    `,
+  })
+}
+
+// ── Password Reset ─────────────────────────────────────────────────────────
+
+/**
+ * Sends a password reset link to the user.
+ *
+ * @param email    - Recipient email address
+ * @param fullName - Recipient's full name
+ * @param token    - Password reset token
+ */
+export async function sendPasswordResetEmail(
+  email: string,
+  fullName: string,
+  token: string
+): Promise<void> {
+  const resetUrl = `${FRONTEND_URL}/reset-password?token=${token}`
+
+  await resend.emails.send({
+    from: FROM_EMAIL,
+    to: email,
+    subject: "Reset your Unideal password",
+    html: `
+      <div style="font-family: sans-serif; max-width: 480px; margin: 0 auto;">
+        <h2 style="color: #A855F7;">Reset Your Password</h2>
+        <p>Hi ${fullName},</p>
+        <p>We received a request to reset your password. Click the button below to set a new one:</p>
+        <div style="text-align: center; margin: 32px 0;">
+          <a href="${resetUrl}" style="background: #A855F7; color: #fff; text-decoration: none; padding: 12px 32px; border-radius: 8px; font-weight: 600; display: inline-block;">
+            Reset Password
+          </a>
+        </div>
+        <p style="font-size: 13px; color: #666;">Or copy and paste this link: <br/>${resetUrl}</p>
+        <p style="font-size: 13px; color: #666;">This link expires in 1 hour. If you didn't request a password reset, you can safely ignore this email.</p>
+        <hr style="border: none; border-top: 1px solid #eee; margin: 24px 0;" />
+        <p style="font-size: 12px; color: #888;">Unideal — Your Campus Marketplace</p>
+      </div>
+    `,
+  })
+}
+
+// ── Notification Preferences ───────────────────────────────────────────────
 
 /** Default notification preferences shape */
 interface NotificationPreferences {
@@ -61,10 +143,10 @@ export async function sendVerificationApprovedEmail(
     html: `
       <div style="font-family: sans-serif; max-width: 480px; margin: 0 auto;">
         <h2 style="color: #A855F7;">Welcome aboard, ${fullName}!</h2>
-        <p>Your college ID has been verified. You can now list items for sale on CampX.</p>
+        <p>Your college ID has been verified. You can now list items for sale on Unideal.</p>
         <p>Start selling by visiting your dashboard.</p>
         <hr style="border: none; border-top: 1px solid #eee; margin: 24px 0;" />
-        <p style="font-size: 12px; color: #888;">CampX — Your Campus Marketplace</p>
+        <p style="font-size: 12px; color: #888;">Unideal — Your Campus Marketplace</p>
       </div>
     `,
   })
@@ -94,7 +176,7 @@ export async function sendVerificationRejectedEmail(
         <p><strong>Reason:</strong> ${reason}</p>
         <p>Please upload a clearer photo of your college ID and try again.</p>
         <hr style="border: none; border-top: 1px solid #eee; margin: 24px 0;" />
-        <p style="font-size: 12px; color: #888;">CampX — Your Campus Marketplace</p>
+        <p style="font-size: 12px; color: #888;">Unideal — Your Campus Marketplace</p>
       </div>
     `,
   })
@@ -125,7 +207,7 @@ export async function sendPaymentSecuredEmail(
         <p>A buyer has paid <strong>₹${amount}</strong> for your listing <strong>"${itemTitle}"</strong>.</p>
         <p>The funds are held in escrow until the buyer confirms receipt. Chat with them to arrange the handoff!</p>
         <hr style="border: none; border-top: 1px solid #eee; margin: 24px 0;" />
-        <p style="font-size: 12px; color: #888;">CampX — Your Campus Marketplace</p>
+        <p style="font-size: 12px; color: #888;">Unideal — Your Campus Marketplace</p>
       </div>
     `,
   })
@@ -151,10 +233,10 @@ export async function sendFundsReleasedEmail(
       <div style="font-family: sans-serif; max-width: 480px; margin: 0 auto;">
         <h2 style="color: #22C55E;">Funds Released!</h2>
         <p>Hi ${fullName},</p>
-        <p><strong>₹${amount}</strong> has been released from escrow and added to your CampX wallet.</p>
+        <p><strong>₹${amount}</strong> has been released from escrow and added to your Unideal wallet.</p>
         <p>You can withdraw your balance anytime from the Wallet page.</p>
         <hr style="border: none; border-top: 1px solid #eee; margin: 24px 0;" />
-        <p style="font-size: 12px; color: #888;">CampX — Your Campus Marketplace</p>
+        <p style="font-size: 12px; color: #888;">Unideal — Your Campus Marketplace</p>
       </div>
     `,
   })
@@ -194,9 +276,9 @@ export async function sendNewMessageEmail(
         <div style="background: #F3F4F6; border-radius: 8px; padding: 12px 16px; margin: 16px 0;">
           <p style="margin: 0; color: #374151;">${messagePreview}</p>
         </div>
-        <p>Open CampX to reply.</p>
+        <p>Open Unideal to reply.</p>
         <hr style="border: none; border-top: 1px solid #eee; margin: 24px 0;" />
-        <p style="font-size: 12px; color: #888;">CampX — Your Campus Marketplace</p>
+        <p style="font-size: 12px; color: #888;">Unideal — Your Campus Marketplace</p>
       </div>
     `,
   })
@@ -250,9 +332,9 @@ export async function sendTransactionUpdateEmail(
           <p style="margin: 0; font-weight: 600;">${status.replace(/_/g, " ")}</p>
           <p style="margin: 8px 0 0; color: #374151;">${statusText}</p>
         </div>
-        <p>Open CampX for details.</p>
+        <p>Open Unideal for details.</p>
         <hr style="border: none; border-top: 1px solid #eee; margin: 24px 0;" />
-        <p style="font-size: 12px; color: #888;">CampX — Your Campus Marketplace</p>
+        <p style="font-size: 12px; color: #888;">Unideal — Your Campus Marketplace</p>
       </div>
     `,
   })
@@ -299,7 +381,7 @@ export async function sendReviewReceivedEmail(
         </div>
         <p>Visit your profile to see all your reviews.</p>
         <hr style="border: none; border-top: 1px solid #eee; margin: 24px 0;" />
-        <p style="font-size: 12px; color: #888;">CampX — Your Campus Marketplace</p>
+        <p style="font-size: 12px; color: #888;">Unideal — Your Campus Marketplace</p>
       </div>
     `,
   })

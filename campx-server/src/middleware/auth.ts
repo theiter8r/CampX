@@ -1,62 +1,38 @@
 import { Request, Response, NextFunction } from "express"
-import { verifyToken, createClerkClient } from "@clerk/backend"
+import jwt from "jsonwebtoken"
 import { prisma } from "../lib/prisma.js"
 
-const clerk = createClerkClient({
-  secretKey: process.env.CLERK_SECRET_KEY!,
-})
+const JWT_SECRET = process.env.JWT_SECRET!
 
 /**
- * Fetches Clerk user data and creates a local DB user + wallet.
- * Used as a fallback when the Clerk webhook hasn't fired yet.
+ * Extracts the access token from httpOnly cookie or Authorization header (fallback).
  */
-async function createUserFromClerk(clerkId: string) {
-  const clerkUser = await clerk.users.getUser(clerkId)
+function extractToken(req: Request): string | null {
+  // 1. Try httpOnly cookie first
+  const cookieToken = req.cookies?.access_token as string | undefined
+  if (cookieToken) return cookieToken
 
-  const primaryEmail = clerkUser.emailAddresses.find(
-    (e) => e.id === clerkUser.primaryEmailAddressId
-  )
-  const email = primaryEmail?.emailAddress ?? ""
-  const fullName =
-    [clerkUser.firstName, clerkUser.lastName].filter(Boolean).join(" ") ||
-    "CampX User"
+  // 2. Fallback to Bearer header (useful for Postman / external API clients)
+  const authHeader = req.headers.authorization
+  if (authHeader?.startsWith("Bearer ")) {
+    return authHeader.slice(7)
+  }
 
-  const user = await prisma.user.create({
-    data: {
-      clerkId,
-      email,
-      fullName,
-      avatarUrl: clerkUser.imageUrl ?? undefined,
-      wallet: { create: {} },
-    },
-    select: {
-      id: true,
-      clerkId: true,
-      email: true,
-      isAdmin: true,
-      isBanned: true,
-      verificationStatus: true,
-      onboardingComplete: true,
-    },
-  })
-
-  console.log(`[Auth fallback] Created user from Clerk: ${email}`)
-  return user
+  return null
 }
 
 /**
- * Verifies Clerk session JWT from `Authorization: Bearer <token>` header.
+ * Verifies JWT from httpOnly cookie or Authorization header.
  * Attaches `req.user` with DB user data including isAdmin and verificationStatus.
- * Falls back to creating the user from Clerk API if webhook hasn't synced yet.
  */
 export async function requireAuth(
   req: Request,
   res: Response,
   next: NextFunction
 ): Promise<void> {
-  const authHeader = req.headers.authorization
+  const token = extractToken(req)
 
-  if (!authHeader?.startsWith("Bearer ")) {
+  if (!token) {
     res.status(401).json({
       success: false,
       error: "Unauthorized — missing token",
@@ -65,19 +41,14 @@ export async function requireAuth(
     return
   }
 
-  const token = authHeader.slice(7)
-
   try {
-    const payload = await verifyToken(token, {
-      secretKey: process.env.CLERK_SECRET_KEY!,
-    })
-    const clerkId = payload.sub
+    const payload = jwt.verify(token, JWT_SECRET) as jwt.JwtPayload
+    const userId = payload.sub as string
 
-    let user = await prisma.user.findUnique({
-      where: { clerkId },
+    const user = await prisma.user.findUnique({
+      where: { id: userId },
       select: {
         id: true,
-        clerkId: true,
         email: true,
         isAdmin: true,
         isBanned: true,
@@ -86,19 +57,13 @@ export async function requireAuth(
       },
     })
 
-    // Fallback: if webhook hasn't created the user yet, do it now
     if (!user) {
-      try {
-        user = await createUserFromClerk(clerkId)
-      } catch (createErr) {
-        console.error("[Auth fallback] Failed to create user:", createErr)
-        res.status(401).json({
-          success: false,
-          error: "User not found — please sign in again",
-          code: "USER_NOT_FOUND",
-        })
-        return
-      }
+      res.status(401).json({
+        success: false,
+        error: "User not found — please sign in again",
+        code: "USER_NOT_FOUND",
+      })
+      return
     }
 
     if (user.isBanned) {
@@ -112,7 +77,6 @@ export async function requireAuth(
 
     req.user = {
       id: user.id,
-      clerkId: user.clerkId,
       email: user.email,
       isAdmin: user.isAdmin,
       verificationStatus: user.verificationStatus,
@@ -127,6 +91,49 @@ export async function requireAuth(
       code: "INVALID_TOKEN",
     })
   }
+}
+
+/**
+ * Optionally extracts user from JWT if present. Does not fail if no token.
+ * Useful for public endpoints that want to personalize responses for logged-in users.
+ */
+export async function optionalAuth(
+  req: Request,
+  _res: Response,
+  next: NextFunction
+): Promise<void> {
+  const token = extractToken(req)
+  if (!token) {
+    next()
+    return
+  }
+  try {
+    const payload = jwt.verify(token, JWT_SECRET) as jwt.JwtPayload
+    const userId = payload.sub as string
+    const user = await prisma.user.findUnique({
+      where: { id: userId },
+      select: {
+        id: true,
+        email: true,
+        isAdmin: true,
+        isBanned: true,
+        verificationStatus: true,
+        onboardingComplete: true,
+      },
+    })
+    if (user && !user.isBanned) {
+      req.user = {
+        id: user.id,
+        email: user.email,
+        isAdmin: user.isAdmin,
+        verificationStatus: user.verificationStatus,
+        onboardingComplete: user.onboardingComplete,
+      }
+    }
+  } catch {
+    // Token invalid — proceed as unauthenticated
+  }
+  next()
 }
 
 /**
