@@ -41,12 +41,14 @@ app.use(helmet())
 const allowedOrigins = (process.env.FRONTEND_URL ?? "http://localhost:5173")
   .split(",")
   .map((o) => o.trim())
+const allowAllOrigins = allowedOrigins.includes("*")
 
 app.use(
   cors({
     origin: (origin, callback) => {
       // Allow requests with no origin (mobile apps, curl, server-to-server)
       if (!origin) return callback(null, true)
+      if (allowAllOrigins) return callback(null, true)
       if (allowedOrigins.includes(origin)) return callback(null, true)
       callback(new Error(`CORS: origin ${origin} not allowed`))
     },
