@@ -1,6 +1,6 @@
 import Ably from "ably"
 
-const ably = new Ably.Rest(process.env.ABLY_API_KEY ?? "")
+const ably = new Ably.Rest(process.env.ABLY_API_KEY || "placeholder.placeholder:placeholder")
 
 /**
  * Publishes a message to an Ably channel.
