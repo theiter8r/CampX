@@ -87,7 +87,7 @@ export default function TransactionManagement() {
   const { data, isLoading } = useQuery<PaginatedResponse>({
     queryKey: ["admin", "transactions", page, statusFilter],
     queryFn: () =>
-      api.get(`/admin/transactions?page=${page}&limit=20&status=${statusFilter}`),
+      api.get(`/api/admin/transactions?page=${page}&limit=20&status=${statusFilter}`),
   })
 
   const interventionMutation = useMutation({
@@ -97,7 +97,7 @@ export default function TransactionManagement() {
     }: {
       transactionId: string
       action: "refund" | "release"
-    }) => api.patch(`/admin/transactions/${transactionId}`, { action }),
+    }) => api.patch(`/api/admin/transactions/${transactionId}`, { action }),
     onSuccess: (_, variables) => {
       qc.invalidateQueries({ queryKey: ["admin", "transactions"] })
       qc.invalidateQueries({ queryKey: ["admin", "stats"] })

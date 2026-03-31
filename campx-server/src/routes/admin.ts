@@ -576,6 +576,52 @@ router.patch(
 )
 
 // ============================================================
+// GET /api/admin/listings — All items with moderation controls
+// ============================================================
+router.get("/listings", async (req, res, next) => {
+  try {
+    const { page, limit, search } = paginationSchema.parse(req.query)
+    const status = req.query.status as string | undefined
+    const skip = (page - 1) * limit
+
+    const where = {
+      ...(status && status !== "ALL" && {
+        status: status as "AVAILABLE" | "RESERVED" | "SOLD" | "RENTED" | "ARCHIVED",
+      }),
+      ...(search && {
+        OR: [
+          { title: { contains: search, mode: "insensitive" as const } },
+          { seller: { fullName: { contains: search, mode: "insensitive" as const } } },
+        ],
+      }),
+    }
+
+    const [items, total] = await Promise.all([
+      prisma.item.findMany({
+        where,
+        include: {
+          seller: { select: { id: true, fullName: true, email: true } },
+          college: { select: { id: true, name: true } },
+          category: { select: { id: true, name: true } },
+          _count: { select: { reports: true, favorites: true, transactions: true } },
+        },
+        orderBy: { createdAt: "desc" },
+        skip,
+        take: limit,
+      }),
+      prisma.item.count({ where }),
+    ])
+
+    res.json({
+      items,
+      pagination: { page, limit, total, pages: Math.ceil(total / limit) },
+    })
+  } catch (error) {
+    next(error)
+  }
+})
+
+// ============================================================
 // POST /api/admin/colleges — Create a new college
 // ============================================================
 router.post(

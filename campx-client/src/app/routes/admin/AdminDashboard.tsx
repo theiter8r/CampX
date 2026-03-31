@@ -74,7 +74,7 @@ function StatCard({ title, value, icon: Icon, loading, badge, href }: StatCardPr
 export default function AdminDashboard() {
   const { data: stats, isLoading } = useQuery<AdminStats>({
     queryKey: ["admin", "stats"],
-    queryFn: () => api.get("/admin/stats"),
+    queryFn: () => api.get("/api/admin/stats"),
     refetchInterval: 60_000, // Refresh every minute
   })
 

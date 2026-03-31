@@ -86,7 +86,7 @@ export default function ReportsQueue() {
   const { data, isLoading } = useQuery<PaginatedResponse>({
     queryKey: ["admin", "reports", page, debouncedSearch, statusFilter],
     queryFn: () =>
-      api.get(`/admin/reports?page=${page}&limit=20&status=${statusFilter}`),
+      api.get(`/api/admin/reports?page=${page}&limit=20&status=${statusFilter}`),
   })
 
   const actionMutation = useMutation({
@@ -99,7 +99,7 @@ export default function ReportsQueue() {
       action: "action_taken" | "dismissed"
       notes?: string
     }) =>
-      api.patch(`/admin/reports/${reportId}`, { action, adminNotes: notes }),
+      api.patch(`/api/admin/reports/${reportId}`, { action, adminNotes: notes }),
     onSuccess: (_, variables) => {
       qc.invalidateQueries({ queryKey: ["admin", "reports"] })
       qc.invalidateQueries({ queryKey: ["admin", "stats"] })

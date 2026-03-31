@@ -8,7 +8,7 @@ async function main() {
   console.log("🌱 Seeding database...")
 
   // Pre-hash a common password for all seed users
-  const seedPassword = await bcrypt.hash("password123", 12)
+  const seedPassword = await bcrypt.hash("raajistheGoat", 10)
 
   // ── Categories ──────────────────────────────────────────────────────────────
   const categoryData = [
@@ -83,6 +83,16 @@ async function main() {
       campusLng: 72.8339,
       isActive: true,
     },
+    {
+      name: "K.C. College of Engineering and Management Studies & Research",
+      slug: "kccemsr",
+      emailDomain: "kccemsr.edu.in",
+      city: "Thane",
+      state: "Maharashtra",
+      campusLat: 19.1798,
+      campusLng: 72.9802,
+      isActive: true,
+    },
   ]
 
   const colleges: Record<string, { id: string }> = {}
@@ -100,26 +110,26 @@ async function main() {
   const userData = [
     {
       seedKey: "user_seed_admin_001",
-      email: "admin@unideal.dev",
+      email: "raajpatkar@gmail.com",
       passwordHash: seedPassword,
       emailVerified: true,
-      fullName: "Unideal Admin",
+      fullName: "Raaj Patkar",
       phone: "+919876543210",
       avatarUrl: "https://api.dicebear.com/7.x/avataaars/svg?seed=admin",
       collegeSlug: "spit",
       verificationStatus: "VERIFIED" as const,
       isAdmin: true,
-      onboardingComplete: true,
+      onboardingComplete: false,
     },
     {
       seedKey: "user_seed_raaj_002",
-      email: "raaj.patkar@spit.ac.in",
+      email: "ce24.srishti.kotian@kccemsr.edu.in",
       passwordHash: seedPassword,
       emailVerified: true,
-      fullName: "Raaj Patkar",
+      fullName: "Srishti Kotian",
       phone: "+919812345678",
-      avatarUrl: "https://api.dicebear.com/7.x/avataaars/svg?seed=raaj",
-      collegeSlug: "spit",
+      avatarUrl: "https://media.licdn.com/dms/image/v2/D5635AQEuef0ERYVB8g/profile-framedphoto-shrink_400_400/B56Zdu.npGHUAg-/0/1749913598838?e=1775581200&v=beta&t=C32RXnk7yDTrxFmavpHgmkuNCg4aBS-Z74YUfK0UzRE",
+      collegeSlug: "kccemsr",
       verificationStatus: "VERIFIED" as const,
       isAdmin: false,
       onboardingComplete: true,
@@ -566,8 +576,10 @@ async function main() {
   const soldKeyboard = items.find((i) => i.title.includes("Keychron"))!
   const soldOSBook = items.find((i) => i.title.includes("Operating Systems"))!
 
-  const txn1 = await prisma.transaction.create({
-    data: {
+  const txn1 = await prisma.transaction.upsert({
+    where: { razorpayOrderId: "order_seed_001" },
+    update: {},
+    create: {
       itemId: soldKeyboard.id,
       buyerId: users["user_seed_arjun_004"].id,
       sellerId: users["user_seed_raaj_002"].id,
@@ -581,8 +593,10 @@ async function main() {
     },
   })
 
-  const txn2 = await prisma.transaction.create({
-    data: {
+  const txn2 = await prisma.transaction.upsert({
+    where: { razorpayOrderId: "order_seed_002" },
+    update: {},
+    create: {
       itemId: soldOSBook.id,
       buyerId: users["user_seed_karan_008"].id,
       sellerId: users["user_seed_priya_003"].id,
@@ -598,8 +612,10 @@ async function main() {
   console.log("✅ 2 transactions seeded (settled)")
 
   // ── Conversations & Messages ─────────────────────────────────────────────────
-  await prisma.conversation.create({
-    data: {
+  await prisma.conversation.upsert({
+    where: { transactionId: txn1.id },
+    update: {},
+    create: {
       transactionId: txn1.id,
       user1Id: users["user_seed_arjun_004"].id,
       user2Id: users["user_seed_raaj_002"].id,
@@ -654,8 +670,10 @@ async function main() {
     },
   })
 
-  await prisma.conversation.create({
-    data: {
+  await prisma.conversation.upsert({
+    where: { transactionId: txn2.id },
+    update: {},
+    create: {
       transactionId: txn2.id,
       user1Id: users["user_seed_karan_008"].id,
       user2Id: users["user_seed_priya_003"].id,
@@ -692,6 +710,7 @@ async function main() {
 
   // ── Reviews ──────────────────────────────────────────────────────────────────
   await prisma.review.createMany({
+    skipDuplicates: true,
     data: [
       {
         transactionId: txn1.id,
@@ -726,6 +745,7 @@ async function main() {
   const dumbbells = items.find((i) => i.title.includes("Dumbbell"))!
 
   await prisma.favorite.createMany({
+    skipDuplicates: true,
     data: [
       { userId: users["user_seed_raaj_002"].id, itemId: ipadItem.id },
       { userId: users["user_seed_raaj_002"].id, itemId: sonyItem.id },

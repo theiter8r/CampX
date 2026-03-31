@@ -86,13 +86,13 @@ export default function ListingModeration() {
     queryKey: ["admin", "listings", page, debouncedSearch, statusFilter],
     queryFn: () =>
       api.get(
-        `/admin/listings?page=${page}&limit=20&search=${debouncedSearch}&status=${statusFilter}`
+        `/api/admin/listings?page=${page}&limit=20&search=${debouncedSearch}&status=${statusFilter}`
       ),
   })
 
   const archiveMutation = useMutation({
     mutationFn: (itemId: string) =>
-      api.patch(`/items/${itemId}`, { status: "ARCHIVED" }),
+      api.patch(`/api/items/${itemId}`, { status: "ARCHIVED" }),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["admin", "listings"] })
       qc.invalidateQueries({ queryKey: ["admin", "stats"] })

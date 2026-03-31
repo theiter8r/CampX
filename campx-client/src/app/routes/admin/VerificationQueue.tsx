@@ -89,7 +89,7 @@ export default function VerificationQueue() {
     queryKey: ["admin", "verifications", page, debouncedSearch, statusFilter],
     queryFn: () =>
       api.get(
-        `/admin/verifications?page=${page}&limit=20&search=${debouncedSearch}&status=${statusFilter}`
+        `/api/admin/verifications?page=${page}&limit=20&search=${debouncedSearch}&status=${statusFilter}`
       ),
   })
 
@@ -102,7 +102,7 @@ export default function VerificationQueue() {
       id: string
       status: "VERIFIED" | "REJECTED"
       reviewerNotes?: string
-    }) => api.patch(`/admin/verifications/${id}`, { status, reviewerNotes }),
+    }) => api.patch(`/api/admin/verifications/${id}`, { status, reviewerNotes }),
     onSuccess: (_data, variables) => {
       qc.invalidateQueries({ queryKey: ["admin", "verifications"] })
       qc.invalidateQueries({ queryKey: ["admin", "stats"] })

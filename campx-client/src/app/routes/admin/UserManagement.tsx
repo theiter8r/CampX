@@ -101,12 +101,12 @@ export default function UserManagement() {
   const { data, isLoading } = useQuery<PaginatedResponse>({
     queryKey: ["admin", "users", page, debouncedSearch],
     queryFn: () =>
-      api.get(`/admin/users?page=${page}&limit=20&search=${debouncedSearch}`),
+      api.get(`/api/admin/users?page=${page}&limit=20&search=${debouncedSearch}`),
   })
 
   const actionMutation = useMutation({
     mutationFn: ({ userId, action }: { userId: string; action: string }) =>
-      api.patch(`/admin/users/${userId}`, { action }),
+      api.patch(`/api/admin/users/${userId}`, { action }),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["admin", "users"] })
       qc.invalidateQueries({ queryKey: ["admin", "stats"] })

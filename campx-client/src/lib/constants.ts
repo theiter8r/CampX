@@ -7,12 +7,12 @@ export const API_BASE_URL =
 
 // -------- Categories --------
 export const CATEGORIES = [
-  { id: 1, name: "Textbooks", slug: "textbooks", iconName: "BookOpen" },
+  { id: 1, name: "Books & Notes", slug: "books-notes", iconName: "BookOpen" },
   { id: 2, name: "Electronics", slug: "electronics", iconName: "Laptop" },
   { id: 3, name: "Furniture", slug: "furniture", iconName: "Armchair" },
-  { id: 4, name: "Sports & Fitness", slug: "sports", iconName: "Dumbbell" },
-  { id: 5, name: "Clothing", slug: "clothing", iconName: "Shirt" },
-  { id: 6, name: "Miscellaneous", slug: "misc", iconName: "Package" },
+  { id: 4, name: "Sports & Fitness", slug: "sports-fitness", iconName: "Dumbbell" },
+  { id: 5, name: "Clothing & Accessories", slug: "clothing-accessories", iconName: "Shirt" },
+  { id: 6, name: "Miscellaneous", slug: "miscellaneous", iconName: "Package" },
 ] as const
 
 // -------- Conditions --------
