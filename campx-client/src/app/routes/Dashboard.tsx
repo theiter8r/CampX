@@ -130,15 +130,30 @@ export function Dashboard() {
   }
 
   return (
-    <div className="mx-auto max-w-5xl px-4 py-8 sm:px-6 lg:px-8">
+    <div className="dashboard-shell mx-auto max-w-5xl px-4 py-8 sm:px-6 lg:px-8">
       {/* Header */}
-      <div className="flex items-center gap-3 mb-8">
-        <LayoutDashboard className="text-primary" size={24} />
-        <h1 className="text-2xl font-semibold text-foreground">Dashboard</h1>
+      <div className="relative z-10 mb-8 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+        <div className="flex items-center gap-3">
+          <div className="flex h-11 w-11 items-center justify-center rounded-xl border border-primary/35 bg-primary/12">
+            <LayoutDashboard className="text-primary" size={22} />
+          </div>
+          <div>
+            <h1 className="text-2xl font-semibold text-foreground">Dashboard</h1>
+            <p className="text-sm text-muted-foreground">
+              Track listings, escrow, and campus activity from one command center.
+            </p>
+          </div>
+        </div>
+        <Badge
+          variant="outline"
+          className="w-fit border-secondary/45 bg-secondary/12 px-3 py-1 text-[11px] font-semibold tracking-wide text-secondary"
+        >
+          Live Campus Pulse
+        </Badge>
       </div>
 
       {/* Stat cards */}
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-8">
+      <div className="relative z-10 mb-8 grid grid-cols-2 gap-4 sm:grid-cols-4">
         {stats.map(({ icon: Icon, label, value }, i) => (
           <motion.div
             key={label}
@@ -146,9 +161,11 @@ export function Dashboard() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.3, delay: i * 0.05 }}
           >
-            <Card>
+            <Card className="dashboard-panel h-full">
               <CardHeader className="pb-2">
-                <Icon className="text-primary" size={18} />
+                <div className="flex h-9 w-9 items-center justify-center rounded-lg border border-primary/30 bg-primary/10">
+                  <Icon className="text-primary" size={16} />
+                </div>
               </CardHeader>
               <CardContent>
                 <p className="text-2xl font-bold text-foreground">{value}</p>
@@ -165,12 +182,12 @@ export function Dashboard() {
           initial={{ opacity: 0, y: 12 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.25 }}
-          className="mb-8"
+          className="relative z-10 mb-8"
         >
-          <Card className="border-purple-800/40 bg-purple-500/5">
+          <Card className="dashboard-panel border-secondary/45 bg-secondary/10">
             <CardHeader className="pb-3">
               <CardTitle className="flex items-center gap-2 text-base">
-                <Star className="h-4 w-4 text-purple-400" />
+                <Star className="h-4 w-4 text-secondary" />
                 Leave a Review ({pendingReviews.length})
               </CardTitle>
               <p className="text-xs text-muted-foreground">
@@ -181,7 +198,7 @@ export function Dashboard() {
               {pendingReviews.slice(0, 3).map((tx) => (
                 <div
                   key={tx.id}
-                  className="rounded-lg border border-zinc-800 bg-zinc-900/60 p-4"
+                  className="rounded-lg border border-border/70 bg-background/45 p-4 backdrop-blur-sm"
                 >
                   <div className="flex items-center gap-3 mb-3">
                     {tx.item.images?.[0] && (
@@ -218,27 +235,39 @@ export function Dashboard() {
       )}
 
       {/* Main grid */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      <div className="relative z-10 grid grid-cols-1 gap-6 lg:grid-cols-3">
         {/* Transactions section — spans 2 cols */}
         <div className="lg:col-span-2 space-y-4">
-          <Card>
+          <Card className="dashboard-panel">
             <CardHeader className="flex-row items-center justify-between space-y-0">
               <CardTitle>Transactions</CardTitle>
               <Tabs
                 value={statusFilter}
                 onValueChange={(v) => setStatusFilter(v as TransactionStatus | "ALL")}
               >
-                <TabsList className="h-8">
-                  <TabsTrigger value="ALL" className="text-xs px-2">
+                <TabsList className="h-8 border border-border/70 bg-background/60">
+                  <TabsTrigger
+                    value="ALL"
+                    className="px-2 text-xs data-[state=active]:border data-[state=active]:border-primary/35 data-[state=active]:bg-primary/15"
+                  >
                     All
                   </TabsTrigger>
-                  <TabsTrigger value="RESERVED" className="text-xs px-2">
+                  <TabsTrigger
+                    value="RESERVED"
+                    className="px-2 text-xs data-[state=active]:border data-[state=active]:border-primary/35 data-[state=active]:bg-primary/15"
+                  >
                     Escrow
                   </TabsTrigger>
-                  <TabsTrigger value="SETTLED" className="text-xs px-2">
+                  <TabsTrigger
+                    value="SETTLED"
+                    className="px-2 text-xs data-[state=active]:border data-[state=active]:border-primary/35 data-[state=active]:bg-primary/15"
+                  >
                     Completed
                   </TabsTrigger>
-                  <TabsTrigger value="DISPUTED" className="text-xs px-2">
+                  <TabsTrigger
+                    value="DISPUTED"
+                    className="px-2 text-xs data-[state=active]:border data-[state=active]:border-primary/35 data-[state=active]:bg-primary/15"
+                  >
                     Disputed
                   </TabsTrigger>
                 </TabsList>
@@ -289,7 +318,7 @@ export function Dashboard() {
 
         {/* Sidebar — recent listings + quick links */}
         <div className="space-y-4">
-          <Card>
+          <Card className="dashboard-panel">
             <CardHeader>
               <CardTitle>My Listings</CardTitle>
             </CardHeader>
@@ -315,7 +344,7 @@ export function Dashboard() {
                     <Link
                       key={item.id}
                       to={ROUTES.ITEM_DETAIL(item.id)}
-                      className="flex items-center gap-3 rounded-lg border border-border p-2 hover:bg-muted/40 transition-colors"
+                      className="dashboard-link-item flex items-center gap-3 rounded-lg p-2"
                     >
                       <img
                         src={item.images[0]}
@@ -334,9 +363,9 @@ export function Dashboard() {
                         variant="outline"
                         className={cn(
                           "text-[10px]",
-                          item.status === "AVAILABLE" && "border-green-800 text-green-400",
-                          item.status === "SOLD" && "border-zinc-700 text-zinc-400",
-                          item.status === "RENTED" && "border-blue-800 text-blue-400"
+                          item.status === "AVAILABLE" && "border-emerald-500/35 bg-emerald-500/10 text-emerald-300",
+                          item.status === "SOLD" && "border-slate-500/45 bg-slate-500/12 text-slate-300",
+                          item.status === "RENTED" && "border-cyan-500/35 bg-cyan-500/10 text-cyan-300"
                         )}
                       >
                         {item.status}
@@ -344,7 +373,12 @@ export function Dashboard() {
                     </Link>
                   ))}
                   {myItems.length > 5 && (
-                    <Button variant="ghost" size="sm" className="w-full mt-1" asChild>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="mt-1 w-full justify-between border border-border/65 bg-background/35 hover:border-primary/40 hover:bg-primary/10"
+                      asChild
+                    >
                       <Link to={ROUTES.BROWSE}>
                         View all ({myItems.length})
                         <ChevronRight className="h-3.5 w-3.5 ml-1" />
@@ -356,26 +390,41 @@ export function Dashboard() {
             </CardContent>
           </Card>
 
-          <Card>
+          <Card className="dashboard-panel">
             <CardHeader>
               <CardTitle>Quick Links</CardTitle>
             </CardHeader>
             <CardContent className="space-y-2">
-              <Button variant="outline" size="sm" className="w-full justify-start" asChild>
+              <Button
+                variant="outline"
+                size="sm"
+                className="group w-full justify-start border-border/70 bg-background/40 hover:border-primary/40 hover:bg-primary/10"
+                asChild
+              >
                 <Link to={ROUTES.WALLET}>
-                  <Wallet className="h-4 w-4 mr-2" />
+                  <Wallet className="mr-2 h-4 w-4 text-primary/80 transition-colors group-hover:text-primary" />
                   Wallet
                 </Link>
               </Button>
-              <Button variant="outline" size="sm" className="w-full justify-start" asChild>
+              <Button
+                variant="outline"
+                size="sm"
+                className="group w-full justify-start border-border/70 bg-background/40 hover:border-primary/40 hover:bg-primary/10"
+                asChild
+              >
                 <Link to={ROUTES.SELL}>
-                  <ShoppingBag className="h-4 w-4 mr-2" />
+                  <ShoppingBag className="mr-2 h-4 w-4 text-primary/80 transition-colors group-hover:text-primary" />
                   Sell an Item
                 </Link>
               </Button>
-              <Button variant="outline" size="sm" className="w-full justify-start" asChild>
+              <Button
+                variant="outline"
+                size="sm"
+                className="group w-full justify-start border-border/70 bg-background/40 hover:border-primary/40 hover:bg-primary/10"
+                asChild
+              >
                 <Link to={ROUTES.CHAT}>
-                  <MessageSquare className="h-4 w-4 mr-2" />
+                  <MessageSquare className="mr-2 h-4 w-4 text-primary/80 transition-colors group-hover:text-primary" />
                   Messages
                 </Link>
               </Button>
@@ -389,7 +438,7 @@ export function Dashboard() {
         open={!!disputeDialogTx}
         onOpenChange={(v) => !v && setDisputeDialogTx(null)}
       >
-        <DialogContent className="sm:max-w-md">
+        <DialogContent className="border-border/70 bg-card/95 backdrop-blur-sm sm:max-w-md">
           <DialogHeader>
             <DialogTitle>Raise a Dispute</DialogTitle>
             <DialogDescription>
@@ -399,7 +448,7 @@ export function Dashboard() {
           </DialogHeader>
           {disputeDialogTx && (
             <div className="space-y-4">
-              <div className="rounded-lg border border-border bg-muted/30 p-3 text-sm">
+              <div className="rounded-lg border border-border/70 bg-background/40 p-3 text-sm">
                 <p className="font-medium text-foreground">
                   {disputeDialogTx.item.title}
                 </p>
@@ -475,7 +524,7 @@ function TransactionCard({
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, scale: 0.95 }}
       transition={{ duration: 0.25, delay: index * 0.03 }}
-      className="rounded-lg border border-border bg-card/60 p-4"
+      className="dashboard-panel rounded-xl p-4"
     >
       <div className="flex items-start gap-3">
         {/* Item thumbnail */}
@@ -568,7 +617,7 @@ function TransactionCard({
                 <Button
                   size="sm"
                   variant="ghost"
-                  className="h-7 text-xs"
+                  className="h-7 text-xs text-primary hover:bg-primary/10"
                   onClick={onChat}
                 >
                   <MessageSquare className="h-3 w-3 mr-1" />

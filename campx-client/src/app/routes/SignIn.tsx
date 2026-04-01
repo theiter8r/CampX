@@ -8,7 +8,15 @@ import { zodResolver } from "@hookform/resolvers/zod"
 import { z } from "zod"
 import { Link, useNavigate } from "react-router-dom"
 import { toast } from "sonner"
-import { Loader2, Eye, EyeOff } from "lucide-react"
+import { motion } from "framer-motion"
+import {
+  Loader2,
+  Eye,
+  EyeOff,
+  ShieldCheck,
+  Sparkles,
+  Building2,
+} from "lucide-react"
 
 import { useAuth } from "@/contexts/AuthContext"
 import { ApiError } from "@/lib/api"
@@ -55,85 +63,175 @@ export function SignIn() {
     }
   }
 
+  const trustHighlights = [
+    {
+      icon: ShieldCheck,
+      title: "Verified campus community",
+      description: "Buy and sell with students from trusted colleges.",
+    },
+    {
+      icon: Building2,
+      title: "Hyper-local discovery",
+      description: "Find listings near your campus in minutes.",
+    },
+    {
+      icon: Sparkles,
+      title: "Fast, secure access",
+      description: "Jump back into chats, orders, and favorites instantly.",
+    },
+  ]
+
   return (
-    <div className="flex min-h-[70vh] items-center justify-center px-4 py-10">
-      <div className="w-full max-w-md space-y-6 rounded-xl border border-zinc-800 bg-[#121212] p-8 shadow-xl">
-        <div className="text-center">
-          <h1 className="text-2xl font-bold text-white">Welcome back</h1>
-          <p className="mt-1 text-sm text-zinc-400">
-            Sign in to your CampX account
+    <div className="relative isolate overflow-hidden px-4 py-10 sm:px-6 lg:px-8">
+      <div className="pointer-events-none absolute inset-0">
+        <div className="absolute -left-16 top-16 h-64 w-64 rounded-full bg-cyan-400/15 blur-3xl" />
+        <div className="absolute -right-10 bottom-12 h-72 w-72 rounded-full bg-amber-300/10 blur-3xl" />
+      </div>
+
+      <div className="mx-auto grid min-h-[72vh] max-w-6xl items-center gap-8 lg:grid-cols-[1.05fr_0.95fr]">
+        <motion.section
+          initial={{ opacity: 0, y: 16 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.45, ease: "easeOut" }}
+          className="hidden lg:block"
+        >
+          <p className="mb-4 inline-flex items-center gap-2 rounded-full border border-cyan-300/25 bg-cyan-400/10 px-3 py-1 text-xs font-medium text-cyan-200">
+            <Sparkles className="h-3.5 w-3.5" />
+            Student Marketplace Network
           </p>
-        </div>
+          <h1 className="max-w-xl text-4xl font-semibold leading-tight text-white xl:text-5xl">
+            Welcome back to your trusted campus marketplace.
+          </h1>
+          <p className="mt-4 max-w-lg text-base text-zinc-300">
+            Continue where you left off and discover listings, chat with sellers,
+            and manage your transactions in one place.
+          </p>
 
-        <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-          <div className="space-y-2">
-            <Label htmlFor="email" className="text-zinc-300">
-              Email
-            </Label>
-            <Input
-              id="email"
-              type="email"
-              placeholder="you@college.ac.in"
-              className="border-zinc-700 bg-zinc-900 text-white placeholder:text-zinc-500 focus:border-primary"
-              {...register("email")}
-            />
-            {errors.email && (
-              <p className="text-xs text-red-400">{errors.email.message}</p>
-            )}
+          <div className="mt-8 space-y-3">
+            {trustHighlights.map(({ icon: Icon, title, description }, index) => (
+              <motion.div
+                key={title}
+                initial={{ opacity: 0, x: -10 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ delay: 0.1 + index * 0.08, duration: 0.35 }}
+                className="flex items-start gap-3 rounded-xl border border-zinc-800/80 bg-[#101a2a]/65 p-3"
+              >
+                <span className="mt-0.5 rounded-lg bg-cyan-400/15 p-2 text-cyan-300">
+                  <Icon className="h-4 w-4" />
+                </span>
+                <div>
+                  <p className="text-sm font-medium text-zinc-100">{title}</p>
+                  <p className="text-xs text-zinc-400">{description}</p>
+                </div>
+              </motion.div>
+            ))}
           </div>
+        </motion.section>
 
-          <div className="space-y-2">
-            <div className="flex items-center justify-between">
-              <Label htmlFor="password" className="text-zinc-300">
-                Password
-              </Label>
+        <motion.section
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.45, ease: "easeOut", delay: 0.06 }}
+          className="relative"
+        >
+          <div className="rounded-2xl border border-cyan-300/20 bg-[#101a2a]/90 p-5 shadow-[0_25px_60px_rgba(3,8,20,0.65)] backdrop-blur-xl sm:p-8">
+            <div className="mb-6 space-y-2 text-center sm:text-left">
+              <p className="inline-flex items-center gap-2 rounded-full border border-cyan-300/20 bg-cyan-400/10 px-3 py-1 text-xs font-medium text-cyan-200">
+                <ShieldCheck className="h-3.5 w-3.5" />
+                Secure Login
+              </p>
+              <h2 className="text-2xl font-semibold text-white">Welcome back</h2>
+              <p className="text-sm text-zinc-400">
+                Sign in to your CampX account
+              </p>
+            </div>
+
+            <div className="mb-5 flex flex-wrap gap-2 lg:hidden">
+              <span className="rounded-full border border-cyan-300/20 bg-cyan-400/10 px-2.5 py-1 text-[11px] font-medium text-cyan-200">
+                Verified Sellers
+              </span>
+              <span className="rounded-full border border-amber-300/20 bg-amber-300/10 px-2.5 py-1 text-[11px] font-medium text-amber-200">
+                Escrow Protected
+              </span>
+              <span className="rounded-full border border-zinc-600/50 bg-zinc-700/25 px-2.5 py-1 text-[11px] font-medium text-zinc-300">
+                Campus Only
+              </span>
+            </div>
+
+            <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+              <div className="space-y-2">
+                <Label htmlFor="email" className="text-zinc-300">
+                  Email
+                </Label>
+                <Input
+                  id="email"
+                  type="email"
+                  placeholder="you@college.ac.in"
+                  className="border-zinc-700 bg-zinc-900/85 text-white placeholder:text-zinc-500 focus:border-primary"
+                  {...register("email")}
+                />
+                {errors.email && (
+                  <p className="text-xs text-red-400">{errors.email.message}</p>
+                )}
+              </div>
+
+              <div className="space-y-2">
+                <div className="flex items-center justify-between">
+                  <Label htmlFor="password" className="text-zinc-300">
+                    Password
+                  </Label>
+                  <Link
+                    to="/forgot-password"
+                    className="text-xs text-primary hover:text-primary/80"
+                  >
+                    Forgot password?
+                  </Link>
+                </div>
+                <div className="relative">
+                  <Input
+                    id="password"
+                    type={showPassword ? "text" : "password"}
+                    placeholder="••••••••"
+                    className="border-zinc-700 bg-zinc-900/85 pr-10 text-white placeholder:text-zinc-500 focus:border-primary"
+                    {...register("password")}
+                  />
+                  <button
+                    type="button"
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-zinc-400 hover:text-zinc-200"
+                    onClick={() => setShowPassword((p) => !p)}
+                    tabIndex={-1}
+                  >
+                    {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
+                  </button>
+                </div>
+                {errors.password && (
+                  <p className="text-xs text-red-400">{errors.password.message}</p>
+                )}
+              </div>
+
+              <Button
+                type="submit"
+                disabled={isSubmitting}
+                className="w-full btn-primary-gradient"
+              >
+                {isSubmitting ? (
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                ) : null}
+                Sign In
+              </Button>
+            </form>
+
+            <p className="mt-6 text-center text-sm text-zinc-400">
+              Don&apos;t have an account?{" "}
               <Link
-                to="/forgot-password"
-                className="text-xs text-primary hover:text-primary/80"
+                to={ROUTES.SIGN_UP}
+                className="font-medium text-primary hover:text-primary/80"
               >
-                Forgot password?
+                Sign up
               </Link>
-            </div>
-            <div className="relative">
-              <Input
-                id="password"
-                type={showPassword ? "text" : "password"}
-                placeholder="••••••••"
-                className="border-zinc-700 bg-zinc-900 pr-10 text-white placeholder:text-zinc-500 focus:border-primary"
-                {...register("password")}
-              />
-              <button
-                type="button"
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-zinc-400 hover:text-zinc-200"
-                onClick={() => setShowPassword((p) => !p)}
-                tabIndex={-1}
-              >
-                {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
-              </button>
-            </div>
-            {errors.password && (
-              <p className="text-xs text-red-400">{errors.password.message}</p>
-            )}
+            </p>
           </div>
-
-          <Button
-            type="submit"
-            disabled={isSubmitting}
-            className="w-full bg-primary hover:bg-primary/90"
-          >
-            {isSubmitting ? (
-              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-            ) : null}
-            Sign In
-          </Button>
-        </form>
-
-        <p className="text-center text-sm text-zinc-400">
-          Don&apos;t have an account?{" "}
-          <Link to={ROUTES.SIGN_UP} className="text-primary hover:text-primary/80">
-            Sign up
-          </Link>
-        </p>
+        </motion.section>
       </div>
     </div>
   )

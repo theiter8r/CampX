@@ -1,4 +1,4 @@
-import { Link, NavLink, useNavigate } from "react-router-dom"
+import { Link, useNavigate } from "react-router-dom"
 import { useAuth } from "@/contexts/AuthContext"
 import { motion } from "framer-motion"
 import { LogOut, Menu, Plus, Settings, User } from "lucide-react"
@@ -17,12 +17,21 @@ import { MobileNav } from "./MobileNav"
 import { useState } from "react"
 import { ROUTES } from "@/lib/constants"
 
-const NAV_LINKS = [
+const APP_NAV_LINKS = [
   { href: ROUTES.BROWSE, label: "Browse" },
   { href: ROUTES.DASHBOARD, label: "Dashboard" },
   { href: ROUTES.FAVORITES, label: "Favorites" },
   { href: ROUTES.WALLET, label: "Wallet" },
 ]
+
+const LANDING_SECTION_LINKS = [
+  { href: `${ROUTES.HOME}#recent-listings`, label: "Recently Listed" },
+  { href: `${ROUTES.HOME}#categories`, label: "Categories" },
+  { href: `${ROUTES.HOME}#why-campx`, label: "Why CampX" },
+  { href: `${ROUTES.HOME}#how-it-works`, label: "How It Works" },
+]
+
+const DESKTOP_LINKS = [...APP_NAV_LINKS, ...LANDING_SECTION_LINKS]
 
 /** Top navigation bar — responsive, auth-aware */
 export function Navbar() {
@@ -51,22 +60,15 @@ export function Navbar() {
 
           {/* Desktop nav links */}
           <div className="hidden md:flex items-center gap-1">
-            {isAuthenticated &&
-              NAV_LINKS.map((link) => (
-                <NavLink
-                  key={link.href}
-                  to={link.href}
-                  className={({ isActive }) =>
-                    `px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
-                      isActive
-                        ? "text-primary bg-primary/10"
-                        : "text-muted-foreground hover:text-foreground hover:bg-muted"
-                    }`
-                  }
-                >
-                  {link.label}
-                </NavLink>
-              ))}
+            {DESKTOP_LINKS.map((link) => (
+              <Link
+                key={link.href}
+                to={link.href}
+                className="px-3 py-2 rounded-lg text-sm font-medium text-muted-foreground transition-colors hover:text-foreground hover:bg-muted"
+              >
+                {link.label}
+              </Link>
+            ))}
           </div>
 
           {/* Right side actions */}

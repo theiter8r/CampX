@@ -1,5 +1,6 @@
 import type { Config } from "tailwindcss"
 import { fontFamily } from "tailwindcss/defaultTheme"
+import animate from "tailwindcss-animate"
 
 const config: Config = {
   darkMode: ["class"],
@@ -78,17 +79,21 @@ const config: Config = {
       },
       backgroundImage: {
         "gradient-purple":
-          "linear-gradient(135deg, #7C3AED, #A855F7, #C084FC)",
+          "linear-gradient(135deg, #0E7490, #06B6D4, #14B8A6)",
+        "gradient-campx":
+          "linear-gradient(135deg, #0E7490, #06B6D4, #14B8A6)",
+        "gradient-sunset":
+          "linear-gradient(135deg, #F59E0B, #FB7185, #F97316)",
       },
       boxShadow: {
-        "glow-sm": "0 0 10px rgba(168, 85, 247, 0.25)",
-        glow: "0 0 20px rgba(168, 85, 247, 0.35)",
-        "glow-lg": "0 0 30px rgba(168, 85, 247, 0.55)",
-        "glow-card": "0 0 15px rgba(168, 85, 247, 0.15)",
+        "glow-sm": "0 0 10px rgba(34, 211, 238, 0.2)",
+        glow: "0 0 20px rgba(34, 211, 238, 0.32)",
+        "glow-lg": "0 0 30px rgba(34, 211, 238, 0.48)",
+        "glow-card": "0 0 15px rgba(34, 211, 238, 0.14)",
       },
     },
   },
-  plugins: [require("tailwindcss-animate")],
+  plugins: [animate],
 }
 
 export default config

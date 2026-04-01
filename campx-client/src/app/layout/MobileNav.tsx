@@ -39,6 +39,16 @@ const LINKS = [
   { href: ROUTES.SETTINGS, label: "Settings", icon: Settings },
 ]
 
+const LANDING_LINKS = [
+  { href: ROUTES.HOME, label: "Home", icon: Home },
+  { href: `${ROUTES.HOME}#recent-listings`, label: "Recently Listed", icon: Search },
+  { href: `${ROUTES.HOME}#categories`, label: "Categories", icon: LayoutDashboard },
+  { href: `${ROUTES.HOME}#why-campx`, label: "Why CampX", icon: ShieldCheck },
+  { href: `${ROUTES.HOME}#how-it-works`, label: "How It Works", icon: MessageCircle },
+]
+
+const DRAWER_LINKS = [...LINKS, ...LANDING_LINKS.slice(1)]
+
 /** Slide-out mobile navigation drawer */
 export function MobileNav({ open, onClose }: MobileNavProps) {
   const { isAuthenticated, user } = useAuth()
@@ -81,7 +91,7 @@ export function MobileNav({ open, onClose }: MobileNavProps) {
         <Separator />
 
         <nav className="flex flex-col gap-1 p-4">
-          {LINKS.map(({ href, label, icon: Icon }) => (
+          {DRAWER_LINKS.map(({ href, label, icon: Icon }) => (
             <NavLink
               key={href}
               to={href}

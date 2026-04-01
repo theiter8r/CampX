@@ -5,46 +5,46 @@
 @layer base {
   /* ===========================
    * Dark Theme (Default + only)
-   * CampX Design System
+   * CampX Midnight + Aqua Design System
    * =========================== */
   :root {
-    --background: 0 0% 4%;          /* #0A0A0A — near-black */
-    --foreground: 0 0% 98%;         /* #FAFAFA — white text */
+    --background: 218 47% 6%;       /* #08101D — deep midnight */
+    --foreground: 210 40% 98%;      /* #F8FAFC — bright foreground */
 
-    --card: 0 0% 7%;                /* #121212 — card surface */
+    --card: 220 39% 10%;            /* #101A2A — panel surface */
     --card-foreground: 0 0% 98%;
 
-    --popover: 0 0% 7%;
+    --popover: 220 39% 10%;
     --popover-foreground: 0 0% 98%;
 
-    --primary: 270 70% 63%;         /* #A855F7 — purple-500 */
-    --primary-foreground: 0 0% 98%;
+    --primary: 188 90% 55%;         /* #28D8F4 — cyan accent */
+    --primary-foreground: 222 47% 10%;
 
-    --secondary: 270 100% 93%;      /* #E9D5FF — purple-100 subtle */
-    --secondary-foreground: 270 70% 30%;
+    --secondary: 37 94% 62%;        /* #FBBF48 — warm amber */
+    --secondary-foreground: 28 71% 16%;
 
-    --muted: 240 4% 12%;            /* #1E1E1E — elevated surface */
-    --muted-foreground: 240 5% 65%; /* #A1A1AA — zinc-400 */
+    --muted: 220 27% 16%;           /* #1C2636 — elevated surface */
+    --muted-foreground: 215 20% 70%;
 
-    --accent: 240 4% 12%;
-    --accent-foreground: 270 70% 63%;
+    --accent: 194 62% 18%;
+    --accent-foreground: 188 88% 70%;
 
     --destructive: 0 84% 60%;       /* #EF4444 — red */
     --destructive-foreground: 0 0% 98%;
 
-    --border: 240 5% 16%;           /* #27272A — zinc-800 */
-    --input: 240 4% 12%;            /* #1E1E1E */
-    --ring: 270 70% 63%;            /* purple focus ring */
+    --border: 218 28% 22%;          /* #283447 — deep slate border */
+    --input: 220 27% 16%;
+    --ring: 188 90% 55%;            /* cyan focus ring */
 
     --radius: 0.75rem;              /* rounded-xl base */
 
     /* Custom CampX tokens */
-    --surface: 0 0% 7%;
-    --surface-variant: 240 4% 12%;
-    --primary-light: 270 79% 69%;   /* #C084FC — purple-400 */
-    --primary-dark: 262 71% 46%;    /* #7C3AED — purple-600 */
-    --success: 142 71% 45%;         /* #22C55E */
-    --warning: 38 92% 50%;          /* #F59E0B */
+    --surface: 220 39% 10%;
+    --surface-variant: 220 27% 16%;
+    --primary-light: 190 95% 67%;
+    --primary-dark: 188 75% 42%;
+    --success: 145 63% 45%;         /* #2DC670 */
+    --warning: 38 92% 55%;          /* #F6B33B */
   }
 
   /* Force dark mode permanently on <html> */
@@ -55,25 +55,25 @@
 
   /* shadcn dark class (same values — dark is default) */
   .dark {
-    --background: 0 0% 4%;
-    --foreground: 0 0% 98%;
-    --card: 0 0% 7%;
+    --background: 218 47% 6%;
+    --foreground: 210 40% 98%;
+    --card: 220 39% 10%;
     --card-foreground: 0 0% 98%;
-    --popover: 0 0% 7%;
+    --popover: 220 39% 10%;
     --popover-foreground: 0 0% 98%;
-    --primary: 270 70% 63%;
-    --primary-foreground: 0 0% 98%;
-    --secondary: 270 100% 93%;
-    --secondary-foreground: 270 70% 30%;
-    --muted: 240 4% 12%;
-    --muted-foreground: 240 5% 65%;
-    --accent: 240 4% 12%;
-    --accent-foreground: 270 70% 63%;
+    --primary: 188 90% 55%;
+    --primary-foreground: 222 47% 10%;
+    --secondary: 37 94% 62%;
+    --secondary-foreground: 28 71% 16%;
+    --muted: 220 27% 16%;
+    --muted-foreground: 215 20% 70%;
+    --accent: 194 62% 18%;
+    --accent-foreground: 188 88% 70%;
     --destructive: 0 84% 60%;
     --destructive-foreground: 0 0% 98%;
-    --border: 240 5% 16%;
-    --input: 240 4% 12%;
-    --ring: 270 70% 63%;
+    --border: 218 28% 22%;
+    --input: 220 27% 16%;
+    --ring: 188 90% 55%;
     --radius: 0.75rem;
   }
 
@@ -84,6 +84,11 @@
   body {
     @apply bg-background text-foreground font-sans antialiased;
     font-family: "Poppins", system-ui, sans-serif;
+    background-image:
+      radial-gradient(circle at 12% 8%, hsl(188 90% 55% / 0.1), transparent 34%),
+      radial-gradient(circle at 88% 0%, hsl(37 94% 62% / 0.11), transparent 38%),
+      linear-gradient(180deg, hsl(var(--background)), hsl(220 45% 5%));
+    background-attachment: fixed;
   }
 
   /* Custom scrollbar (dark theme) */
@@ -95,27 +100,28 @@
     @apply bg-background;
   }
   ::-webkit-scrollbar-thumb {
-    @apply bg-zinc-700 rounded-full;
+    @apply rounded-full;
+    background: hsl(188 42% 33%);
   }
   ::-webkit-scrollbar-thumb:hover {
-    @apply bg-zinc-600;
+    background: hsl(188 55% 42%);
   }
 }
 
 @layer components {
   /* Primary CTA button gradient */
   .btn-primary-gradient {
-    background: linear-gradient(135deg, #7c3aed, #a855f7, #c084fc);
-    color: #fafafa;
-    box-shadow: 0 0 20px rgba(168, 85, 247, 0.35);
+    background: linear-gradient(135deg, #0e7490, #06b6d4, #14b8a6);
+    color: hsl(210 40% 98%);
+    box-shadow: 0 0 20px rgba(34, 211, 238, 0.28);
     transition: box-shadow 0.2s ease, transform 0.2s ease;
   }
   .btn-primary-gradient:hover {
-    box-shadow: 0 0 30px rgba(168, 85, 247, 0.55);
+    box-shadow: 0 0 32px rgba(34, 211, 238, 0.44);
     transform: translateY(-1px);
   }
   .btn-primary-gradient:active {
-    box-shadow: 0 0 15px rgba(168, 85, 247, 0.25);
+    box-shadow: 0 0 15px rgba(13, 148, 136, 0.25);
     transform: translateY(0);
   }
 
@@ -125,7 +131,75 @@
     transition: box-shadow 0.2s ease;
   }
   .card-dark:hover {
-    box-shadow: 0 0 15px rgba(168, 85, 247, 0.15);
+    box-shadow: 0 0 18px rgba(34, 211, 238, 0.16);
+  }
+
+  .dashboard-shell {
+    position: relative;
+    overflow: hidden;
+    border: 1px solid hsl(var(--border) / 0.45);
+    border-radius: 1rem;
+    background:
+      linear-gradient(165deg, hsl(220 39% 11% / 0.94), hsl(221 32% 9% / 0.9));
+    box-shadow:
+      inset 0 1px 0 hsl(0 0% 100% / 0.04),
+      0 24px 50px hsl(220 70% 3% / 0.45);
+  }
+
+  .dashboard-shell::before,
+  .dashboard-shell::after {
+    content: "";
+    position: absolute;
+    pointer-events: none;
+    border-radius: 999px;
+    z-index: 0;
+  }
+
+  .dashboard-shell::before {
+    top: -140px;
+    right: -90px;
+    width: 320px;
+    height: 320px;
+    background: radial-gradient(circle, hsl(188 90% 55% / 0.2), transparent 68%);
+  }
+
+  .dashboard-shell::after {
+    left: -120px;
+    bottom: -160px;
+    width: 300px;
+    height: 300px;
+    background: radial-gradient(circle, hsl(37 94% 62% / 0.15), transparent 72%);
+  }
+
+  .dashboard-panel {
+    position: relative;
+    z-index: 1;
+    border: 1px solid hsl(var(--border) / 0.65);
+    background:
+      linear-gradient(180deg, hsl(220 42% 13% / 0.92), hsl(220 40% 10% / 0.9));
+    box-shadow: inset 0 1px 0 hsl(0 0% 100% / 0.03);
+    transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+  }
+
+  .dashboard-panel:hover {
+    transform: translateY(-2px);
+    border-color: hsl(var(--primary) / 0.35);
+    box-shadow:
+      inset 0 1px 0 hsl(0 0% 100% / 0.03),
+      0 16px 24px hsl(220 70% 3% / 0.32),
+      0 0 24px hsl(188 90% 55% / 0.12);
+  }
+
+  .dashboard-link-item {
+    border: 1px solid hsl(var(--border) / 0.7);
+    background: hsl(var(--background) / 0.35);
+    transition: border-color 0.2s ease, background-color 0.2s ease, transform 0.2s ease;
+  }
+
+  .dashboard-link-item:hover {
+    transform: translateY(-1px);
+    border-color: hsl(var(--primary) / 0.36);
+    background: hsl(var(--primary) / 0.1);
   }
 
   /* Shimmer skeleton */
