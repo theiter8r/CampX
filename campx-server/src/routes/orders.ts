@@ -180,6 +180,7 @@ router.post(
         },
       })
     } catch (error) {
+      console.error("Order creation error:", error)
       next(error)
     }
   }

@@ -36,11 +36,10 @@ import { Card, CardContent } from "@/components/ui/card"
 
 import { Skeleton } from "@/components/ui/skeleton"
 import { ImageUploader } from "@/components/items/ImageUploader"
-import { useUserProfile } from "@/hooks"
+import { useUserProfile, useCategories } from "@/hooks"
 import { useCreateItem } from "@/hooks/useItems"
 import {
   ROUTES,
-  CATEGORIES,
   CONDITIONS,
   LISTING_TYPES,
   MAX_ITEM_IMAGES,
@@ -57,7 +56,7 @@ const sellFormSchema = z
       .max(100, "Title must be at most 100 characters"),
     description: z
       .string()
-      .max(2000, "Description must be at most 2000 characters")
+      .max(1000, "Description must be at most 1000 characters")
       .optional(),
     categoryId: z.number({ required_error: "Please select a category" }),
     condition: z.enum(["NEW", "LIKE_NEW", "USED", "HEAVILY_USED"], {
@@ -118,6 +117,7 @@ const stepVariants = {
 export function SellItem() {
   const navigate = useNavigate()
   const { data: profile, isLoading } = useUserProfile()
+  const { data: categories = [] } = useCategories()
   const createItem = useCreateItem()
   const [step, setStep] = useState(1)
 
@@ -193,8 +193,10 @@ export function SellItem() {
       })
       toast.success("Listing created!")
       navigate(ROUTES.ITEM_DETAIL(item.id))
-    } catch {
-      toast.error("Failed to create listing. Please try again.")
+    } catch (err) {
+      const message =
+        err instanceof Error ? err.message : "Failed to create listing. Please try again."
+      toast.error(message)
     }
   }
 
@@ -327,7 +329,7 @@ export function SellItem() {
                           control={control}
                           render={({ field }) => (
                             <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
-                              {CATEGORIES.map(({ id, name }) => (
+                              {categories.map(({ id, name }) => (
                                 <button
                                   key={id}
                                   type="button"
@@ -537,7 +539,7 @@ export function SellItem() {
                         <ReviewRow
                           label="Category"
                           value={
-                            CATEGORIES.find((c) => c.id === watchedValues.categoryId)?.name ?? "—"
+                            categories.find((c) => c.id === watchedValues.categoryId)?.name ?? "—"
                           }
                         />
                         <ReviewRow

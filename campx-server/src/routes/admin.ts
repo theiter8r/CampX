@@ -622,6 +622,40 @@ router.get("/listings", async (req, res, next) => {
 })
 
 // ============================================================
+// PATCH /api/admin/listings/:id — Archive a listing (admin)
+// ============================================================
+router.patch("/listings/:id", async (req, res, next) => {
+  try {
+    const id = req.params.id as string
+
+    const item = await prisma.item.findUnique({
+      where: { id },
+      select: { id: true, status: true },
+    })
+
+    if (!item) {
+      res.status(404).json({ success: false, error: "Item not found", code: "NOT_FOUND" })
+      return
+    }
+
+    const updated = await prisma.item.update({
+      where: { id },
+      data: { status: "ARCHIVED" },
+      select: {
+        id: true,
+        title: true,
+        status: true,
+        updatedAt: true,
+      },
+    })
+
+    res.json({ success: true, data: updated })
+  } catch (error) {
+    next(error)
+  }
+})
+
+// ============================================================
 // POST /api/admin/colleges — Create a new college
 // ============================================================
 router.post(

@@ -92,7 +92,7 @@ export default function ListingModeration() {
 
   const archiveMutation = useMutation({
     mutationFn: (itemId: string) =>
-      api.patch(`/api/items/${itemId}`, { status: "ARCHIVED" }),
+      api.patch(`/api/admin/listings/${itemId}`, { status: "ARCHIVED" }),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["admin", "listings"] })
       qc.invalidateQueries({ queryKey: ["admin", "stats"] })

@@ -2,6 +2,7 @@
 // Re-export all custom hooks
 // ============================================
 
+export { useCategories } from "./useCategories"
 export { useColleges } from "./useColleges"
 export { useUserProfile } from "./useUserProfile"
 export { useOnboarding } from "./useOnboarding"
