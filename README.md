@@ -30,5 +30,28 @@ A centralized digital platform with:
 *   **Frontend**: React 18, Vite 6, TypeScript 5, Tailwind CSS, shadcn/ui, TanStack Query, Clerk, Mapbox, Ably. (Hosted on Vercel)
 *   **Backend**: Node.js 20, Express 5, Prisma ORM, PostgreSQL 16, Razorpay, Clerk SDK. (Hosted on Railway)
 
+## Deploy on Render
+
+This repository includes a root-level `render.yaml` Blueprint that provisions:
+
+1.  `campx-db` (Render Postgres)
+2.  `campx-api` (Node web service from `campx-server/`)
+3.  `campx-web` (Static site from `campx-client/`)
+
+### Steps
+
+1.  Push this repo to GitHub.
+2.  In Render, go to **New > Blueprint** and connect the repo.
+3.  Select the branch and deploy the Blueprint.
+4.  When prompted, provide values for all `sync: false` environment variables.
+5.  After first deploy, set:
+    *   `campx-web` → `VITE_API_URL=https://<campx-api>.onrender.com`
+    *   `campx-api` → `FRONTEND_URL=https://<campx-web>.onrender.com`
+6.  Redeploy both services once these two URLs are set.
+
+`campx-api` runs Prisma schema changes on deploy:
+* If `prisma/migrations` exists, it runs `prisma migrate deploy`.
+* Otherwise, it falls back to `prisma db push`.
+
 ---
 *For more details, see the [Wiki Documentation](https://github.com/theiter8r/miniproject-campx/wiki).*
