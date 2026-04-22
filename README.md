@@ -49,7 +49,7 @@ This repository includes a root-level `render.yaml` Blueprint that provisions:
     *   `campx-api` → `FRONTEND_URL=https://<campx-web>.onrender.com`
 6.  Redeploy both services once these two URLs are set.
 
-`campx-api` runs Prisma schema changes on deploy:
+`campx-api` runs Prisma schema changes in the start command (free-tier compatible):
 * If `prisma/migrations` exists, it runs `prisma migrate deploy`.
 * Otherwise, it falls back to `prisma db push`.
 

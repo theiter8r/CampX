@@ -6,13 +6,7 @@ services:
     region: oregon
     rootDir: campx-server
     buildCommand: npm ci && npm run db:generate && npm run build
-    preDeployCommand: |
-      if [ -d prisma/migrations ]; then
-        npx prisma migrate deploy
-      else
-        npx prisma db push
-      fi
-    startCommand: npm run start
+    startCommand: sh -c 'if [ -d prisma/migrations ]; then npx prisma migrate deploy; else npx prisma db push; fi && npm run start'
     healthCheckPath: /health
     envVars:
       - key: NODE_VERSION
